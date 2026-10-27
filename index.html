@@ -103,6 +103,9 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
   <div class="chart"><svg id="c2" viewBox="0 0 520 230"></svg><div class="cap">عدد المشروعات التي عليها عمالة يوميًا من ٣١ مشروعًا.</div></div>
  </div>
  <div class="tbl"><table><thead><tr><th>المشروع</th><th>المركز</th><th>الشركة</th><th>الحالة اليوم</th><th>النسبة</th><th>القوى البشرية يوميًا</th><th>النهو المعتمد</th><th>يوم متبقٍ</th></tr></thead><tbody id="tb"></tbody></table></div>
+ <h3 style="margin-top:22px" id="h2t"></h3>
+ <div class="tbl"><table><thead><tr><th>المشروع</th><th>المركز</th><th>الشركة</th><th>القطاع</th><th>النسبة</th><th>المتبقي</th><th>النهو المعتمد</th><th>الموعد القديم</th><th>يوم متبقٍ</th></tr></thead><tbody id="tb2"></tbody></table></div>
+ <div class="foot">هذه المشروعات ليست ضمن الـ٣١ المتأخرة بالتمام اليومي، لذا لا تتوفر لها عمالة يومية. النسب من كشف المراكز ٢٤/١٠، و«—» = لم ترد نسبة.</div>
  <div class="foot">لا يوجد تمام مجمع بتاريخ ٢٣/١٠. الحالة: «شغال» عليه عمالة · «إنذار زمني» عليه عمالة ويحتاج معدلًا يوميًا مرتفعًا للنهو في موعده · «متوقف» بدون عمالة.</div>
 </section>
 <div class="note"><b>مشروعان منتهيان طبقًا للتصميم وجاري عليهما أعمال مستحدثة (تعديل في التصميم – منتظر العرض على السيد اللواء مساعد رئيس الهيئة):</b> شبكة انحدار العليقات (العبد – قوص) · شبكة انحدار الكوم الأحمر (مكتب الفتح – فرشوط).</div>
@@ -216,6 +219,10 @@ function charts(){line('c1',tot,css('--navy'));line('c2',DATA.days.map((d,i)=>la
 // table
 document.getElementById('tb').innerHTML=late.slice().sort((x,y)=>({r:0,y:1,g:2,w:3}[x.st]-{r:0,y:1,g:2,w:3}[y.st])||x.d.localeCompare(y.d)).map(p=>`<tr class="click" data-p="${p.id}"><td><b>${esc(a(p.p))}</b></td><td>${p.c}</td><td>${esc(p.co)}</td><td><span class="st ${ST[p.st][0]}">${ST[p.st][1]}</span></td><td>${pct(p.xh[0])===pct(p.x)?pct(p.x):pct(p.xh[0])+' ← '+pct(p.x)}</td><td style="min-width:150px">${spark(p.labh,150,40)}</td><td>${dm(p.d)}</td><td>${a(left(p.d))}</td></tr>`).join('');
 document.getElementById('tb').addEventListener('click',e=>{const tr=e.target.closest('tr[data-p]');if(tr){D.innerHTML=projHTML(P.find(p=>p.id===tr.dataset.p));D.scrollIntoView({behavior:'smooth',block:'nearest'})}});
+const OTH=MAIN.filter(p=>!p.late).sort((x,y)=>x.c.localeCompare(y.c,'ar')||x.d.localeCompare(y.d));
+document.getElementById('h2t').textContent='باقي المشروعات الجارية ('+a(OTH.length)+' مشروعًا) – ليست ضمن المتأخرة';
+document.getElementById('tb2').innerHTML=OTH.map(p=>`<tr class="click" data-p="${p.id}"><td><b>${esc(a(p.p))}</b></td><td>${p.c}</td><td>${esc(p.co)}</td><td>${p.sec}</td><td>${pct(p.x)}</td><td style="min-width:220px;font-size:12px">${esc(a(p.rem||'—'))}</td><td>${dm(p.d)}</td><td>${dm(p.old)}</td><td>${a(left(p.d))}</td></tr>`).join('');
+document.getElementById('tb2').addEventListener('click',e=>{const tr=e.target.closest('tr[data-p]');if(tr){D.innerHTML=projHTML(P.find(p=>p.id===tr.dataset.p));D.scrollIntoView({behavior:'smooth',block:'nearest'})}});
 function render(){draw();fit();charts()}
 select(ROOT);D.innerHTML=`<h2>كيف تقرأ الخريطة</h2><p class="sub">في المنتصف إجمالي المشروعات، وحوله الفروع: التوزيع الزمني، والمراكز، والقطاعات، والشركات، والموقف اليومي للمشروعات المتأخرة، والأعمال المستحدثة، والمشروعات التي تم نهوها. اضغط على أي فرع لفتحه، وعلى أي مشروع لعرض تفاصيله هنا.</p><div class="chips"><span class="st g">شغال</span><span class="st y">إنذار زمني</span><span class="st r">متوقف</span><span class="st w">منتهٍ طبقًا للتصميم</span></div>`+groupHTML({label:'المشروعات المتوقفة اليوم',items:stopped});
 render();
