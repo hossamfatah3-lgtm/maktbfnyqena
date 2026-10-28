@@ -77,6 +77,10 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 #coSel{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);max-width:240px}
+
+.tabb{border:2px solid transparent;cursor:pointer;font:inherit;font-weight:700;opacity:.55;transition:opacity .15s}
+.tabb:hover{opacity:.85}
+.tabb.on{opacity:1;border-color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.18)}
 </style>
 <div class="wrap">
 <header class="top">
@@ -236,7 +240,12 @@ coSel.addEventListener('change',()=>{const c=coSel.value;all.forEach(n=>{n.hit=f
  else select(ROOT);
  draw();fit();D.scrollIntoView({behavior:'smooth',block:'nearest'})});
 function render(){draw();fit();charts()}
-select(ROOT);D.innerHTML=`<h2>كيف تقرأ الخريطة</h2><p class="sub">في المنتصف إجمالي المشروعات، وحوله الفروع: التوزيع الزمني، والمراكز، والقطاعات، والشركات، والموقف اليومي للمشروعات المتأخرة، والأعمال المستحدثة، والمشروعات التي تم نهوها. اضغط على أي فرع لفتحه، وعلى أي مشروع لعرض تفاصيله هنا.</p><div class="chips"><span class="st g">شغال</span><span class="st y">إنذار زمني</span><span class="st r">متوقف</span><span class="st w">منتهٍ طبقًا للتصميم</span></div>`+groupHTML({label:'المشروعات المتوقفة اليوم',items:stopped});
+function intro(tab){tab=tab||'r';const L={g:late.filter(p=>p.st==='g'),y:late.filter(p=>p.st==='y'),r:late.filter(p=>p.st==='r'),w:DES};
+ const T={g:'المشروعات الشغالة اليوم',y:'مشروعات شغالة – إنذار زمني',r:'المشروعات المتوقفة اليوم',w:'منتهية طبقًا للتصميم (أعمال مستحدثة)'};
+ const btn=k=>`<button class="st ${k} tabb${k===tab?' on':''}" data-tab="${k}">${ST[k][1].replace('شغال – ','')} (${a(L[k].length)})</button>`;
+ D.innerHTML=`<h2>كيف تقرأ الخريطة</h2><p class="sub">في المنتصف إجمالي المشروعات، وحوله الفروع: التوزيع الزمني، والمراكز، والقطاعات، والشركات، والموقف اليومي للمشروعات المتأخرة، والأعمال المستحدثة، والمشروعات التي تم نهوها. اضغط على أي فرع لفتحه، وعلى أي مشروع لعرض تفاصيله هنا.</p><div class="chips tabs">${['g','y','r','w'].map(btn).join('')}</div><div class="hint" style="margin:-4px 0 6px">اضغط على أي حالة لعرض مشروعاتها</div>`+groupHTML({label:T[tab],items:L[tab]});}
+D.addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t){e.stopPropagation();intro(t.dataset.tab)}});
+select(ROOT);intro('r');
 render();
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',render);new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 window.addEventListener('resize',()=>fit());
