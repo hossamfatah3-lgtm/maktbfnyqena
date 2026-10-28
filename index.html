@@ -81,6 +81,9 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 .tabb{border:2px solid transparent;cursor:pointer;font:inherit;font-weight:700;opacity:.55;transition:opacity .15s}
 .tabb:hover{opacity:.85}
 .tabb.on{opacity:1;border-color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.18)}
+
+.fl{cursor:pointer;font:inherit;border:1px solid var(--line)}
+.fl:hover{filter:brightness(.93);text-decoration:underline}
 </style>
 <div class="wrap">
 <header class="top">
@@ -196,7 +199,7 @@ const D=document.getElementById('detail');
 function projHTML(p){const st=p.st?`<span class="st ${ST[p.st][0]}">${ST[p.st][1]}</span>`:'';
  const lh=p.labh?`<dt>العمالة اليوم</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال اليومية</dt><dd>${esc(a(p.day))}</dd>`:'';
  const xh=p.xh&&p.xh[0]!==p.x?`<dt>تطور النسبة</dt><dd>${pct(p.xh[0])} ← ${pct(p.x)}</dd>`:'';
- return `<h2>${esc(a(p.p))}</h2><div class="chips"><span class="chip">${p.c}</span><span class="chip">${esc(p.co)}</span><span class="chip">${p.sec}</span>${st}${p.design?'<span class="chip">أعمال مستحدثة</span>':''}${p.done?'<span class="st g">تم النهو</span>':''}</div>
+ return `<h2>${esc(a(p.p))}</h2><div class="chips"><button class="chip fl" data-f="c" data-v="${esc(p.c)}">${p.c}</button><button class="chip fl" data-f="co" data-v="${esc(p.co)}">${esc(p.co)}</button><button class="chip fl" data-f="sec" data-v="${esc(p.sec)}">${p.sec}</button>${p.st?`<button class="st ${ST[p.st][0]} fl" data-f="st" data-v="${p.st}">${ST[p.st][1]}</button>`:''}${p.design?'<button class="chip fl" data-f="st" data-v="w">أعمال مستحدثة</button>':''}${p.done?'<span class="st g">تم النهو</span>':''}</div>
  <dl><dt>نسبة التنفيذ</dt><dd><b>${pct(p.x)}</b></dd>${xh}<dt>موعد النهو الواقعي</dt><dd><b>${dm(p.d)}</b> (${left(p.d)<0?'فات منذ '+a(-left(p.d))+' يوم':'بعد '+a(left(p.d))+' يوم'})</dd><dt>الموعد القديم بالعرض</dt><dd>${dm(p.old)}</dd><dt>المتبقي</dt><dd>${esc(a(p.rem||'—'))}</dd>${lh}</dl>
  ${p.labh?`<div class="chart">${spark(p.labh,300,60)}<div class="cap">القوى البشرية يوميًا من ${dm(DATA.days[0])} إلى ${dm(DATA.days[DATA.days.length-1])}</div></div>`:((p.lab&&p.lab!=='-'?`<dl><dt>العمالة</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال الجارية</dt><dd>${esc(a(p.day||'—'))}</dd></dl>`:'')+'<div class="hint">المشروع ليس ضمن الـ٣١ المتأخرة'+(p.src?' – البيانات من '+p.src:'')+'.</div>')}`+subHTML(p)}
 function subHTML(p){if(!p.sub)return'';return p.sub.map(s=>`<div class="chart" style="margin-top:10px"><h3 style="margin:0 0 6px">${esc(s.name)} – ${esc(s.co)}</h3><dl><dt>نسبة التنفيذ</dt><dd><b>${pct(s.x)}</b></dd><dt>العمالة</dt><dd>${esc(a(s.lab||'—'))}</dd><dt>الأعمال الجارية</dt><dd>${esc(a(s.day||'—'))}</dd><dt>المتبقي</dt><dd>${esc(a(s.rem||'—'))}</dd></dl><div class="hint">جزء من مشروع ${esc(p.p)} – لا يُحتسب مشروعًا مستقلًا.</div></div>`).join('')}
@@ -244,6 +247,10 @@ function intro(tab){tab=tab||'r';const L={g:late.filter(p=>p.st==='g'),y:late.fi
  const T={g:'المشروعات الشغالة اليوم',y:'مشروعات شغالة – إنذار زمني',r:'المشروعات المتوقفة اليوم',w:'منتهية طبقًا للتصميم (أعمال مستحدثة)'};
  const btn=k=>`<button class="st ${k} tabb${k===tab?' on':''}" data-tab="${k}">${ST[k][1].replace('شغال – ','')} (${a(L[k].length)})</button>`;
  D.innerHTML=`<h2>كيف تقرأ الخريطة</h2><p class="sub">في المنتصف إجمالي المشروعات، وحوله الفروع: التوزيع الزمني، والمراكز، والقطاعات، والشركات، والموقف اليومي للمشروعات المتأخرة، والأعمال المستحدثة، والمشروعات التي تم نهوها. اضغط على أي فرع لفتحه، وعلى أي مشروع لعرض تفاصيله هنا.</p><div class="chips tabs">${['g','y','r','w'].map(btn).join('')}</div><div class="hint" style="margin:-4px 0 6px">اضغط على أي حالة لعرض مشروعاتها</div>`+groupHTML({label:T[tab],items:L[tab]});}
+D.addEventListener('click',e=>{const t=e.target.closest('[data-f]');if(!t)return;e.stopPropagation();const f=t.dataset.f,v=t.dataset.v,ACT2=P.filter(p=>!p.done);
+ let items,label;if(f==='st'){items=v==='w'?DES:late.filter(p=>p.st===v);label={g:'المشروعات الشغالة اليوم',y:'مشروعات شغالة – إنذار زمني',r:'المشروعات المتوقفة اليوم',w:'أعمال مستحدثة (منتهية طبقًا للتصميم)'}[v]}
+ else{items=ACT2.filter(p=>p[f]===v);label=(f==='c'?'مركز ':'')+v}
+ D.innerHTML=groupHTML({label,items})+'<div class="hint" style="margin-top:8px">اضغط على أي مشروع لعرض تفاصيله.</div>';D.scrollTop=0});
 D.addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t){e.stopPropagation();intro(t.dataset.tab)}});
 select(ROOT);intro('r');
 render();
