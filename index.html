@@ -159,6 +159,8 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 .ig2{font-size:12.5px;line-height:1.95;color:#24324F;padding:5px 0;border-bottom:1px dashed #D8DFEA}
 .ig2:last-child{border-bottom:0}
 .ig2 .igl{margin:0 0 0 4px}
+.ig2 .q{color:#6E84AE;font-size:.92em;font-weight:600;white-space:nowrap}
+.ilw .ig2 .q{color:#8EA2C8}
 .ig2 .sep{color:#C9A227;font-weight:700}
 .ig2 .sep2{color:#C9A227;font-size:9px}
 .ig2 b.sh{color:#0A1D42;font-family:'ArDigits','Cairo',sans-serif}
@@ -371,7 +373,7 @@ function itemsHTML(t,sec){const G=sec?classify(splitItems(t),sec):[{label:null,i
  return `<div class="ig">${g.label?`<div class="igl">${esc(a(g.label))}</div>`:''}<ul class="il">${li}</ul></div>`}).join('')}
 function itemsInline(t,sec){const G=sec?classify(splitItems(t),sec):[{label:null,items:splitItems(t).flatMap(g=>(g.label?[g.label+': '+(g.items[0]||'')].concat(g.items.slice(1)):g.items))}];if(!G.length)return '<p>—</p>';
  const SEP='<span class="sep"> – </span>';
- return G.map(g=>{const parts=[];let prev=null,buf=[];const flush=()=>{if(buf.length){parts.push((prev?`<b class="sh">${esc(a(prev))}:</b> `:'')+buf.map(x=>esc(a(x))).join(SEP));buf=[]}};
+ return G.map(g=>{const parts=[];let prev=null,buf=[];const flush=()=>{if(buf.length){parts.push((prev?`<b class="sh">${esc(a(prev))}:</b> `:'')+buf.map(x=>esc(a(x)).replace(/\(((?:عدد|بطول)[^()]*)\)/g,'<span class="q">($1)</span>')).join(SEP));buf=[]}};
   for(const x of g.items){const m=x.match(/^([^:]{2,40}):\s*(.+)$/);const k=m?m[1]:null,v=m?m[2]:x;if(k!==prev){flush();prev=k}buf.push(v)}flush();
   return `<div class="ig2">${g.label?`<span class="igl">${esc(a(g.label))}</span> `:''}${parts.join('<span class="sep2"> ◆ </span>')}</div>`}).join('')}
 function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
