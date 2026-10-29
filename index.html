@@ -112,10 +112,11 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
   <div class="chart"><svg id="c1" viewBox="0 0 520 230"></svg><div class="cap">إجمالي القوى البشرية على المشروعات المتأخرة يوميًا (المعدات غير محسوبة).</div></div>
   <div class="chart"><svg id="c2" viewBox="0 0 520 230"></svg><div class="cap">عدد المشروعات التي عليها عمالة يوميًا من ٣١ مشروعًا.</div></div>
  </div>
- <div class="tbl"><table><thead><tr><th>المشروع</th><th>المركز</th><th>الشركة</th><th>الحالة اليوم</th><th>النسبة</th><th>القوى البشرية يوميًا</th><th>النهو المعتمد</th><th>يوم متبقٍ</th></tr></thead><tbody id="tb"></tbody></table></div>
+ <div class="tbl"><table><thead><tr><th>المشروع</th><th>المركز</th><th>الشركة</th><th>الحالة اليوم</th><th>النسبة</th><th>القوى البشرية يوميًا</th><th>النهو المعتمد</th><th>يوم متبقٍ</th><th>المعدل المطلوب<br>٪ / يوم</th><th>المعدل الفعلي<br>٪ / يوم</th><th>التقييم</th><th>النهو المتوقع<br>بالمعدل الفعلي</th></tr></thead><tbody id="tb"></tbody></table></div>
  <h3 style="margin-top:22px" id="h2t"></h3>
  <div class="tbl"><table><thead><tr><th>المشروع</th><th>المركز</th><th>الشركة</th><th>القطاع</th><th>النسبة</th><th>المتبقي</th><th>النهو المعتمد</th><th>الموعد القديم</th><th>يوم متبقٍ</th></tr></thead><tbody id="tb2"></tbody></table></div>
  <div class="foot">هذه المشروعات ليست ضمن الـ٣١ المتأخرة. البيانات من تمام المراكز بآخر تاريخ (عمود «المصدر» في اللوحة الجانبية عند الضغط على المشروع).</div>
+ <div class="foot"><b>المعدل المطلوب</b> = النسبة المتبقية ÷ الأيام المتبقية على موعد النهو المعتمد. <b>المعدل الفعلي</b> = الزيادة في نسبة التنفيذ منذ أول تمام مسجل (٢٠/١٠) ÷ عدد الأيام. «لا تقدم مسجل» = النسبة لم تتغير بالتمام اليومي. <b>النهو المتوقع</b> = تقدير بفرض استمرار المعدل الفعلي.</div>
  <div class="foot">لا يوجد تمام مجمع بتاريخ ٢٣/١٠. الحالة: «شغال» عليه عمالة · «إنذار زمني» عليه عمالة ويحتاج معدلًا يوميًا مرتفعًا للنهو في موعده · «متوقف» بدون عمالة.</div>
 </section>
 <div class="note"><b>مشروعان منتهيان طبقًا للتصميم وجاري عليهما أعمال مستحدثة (تعديل في التصميم – منتظر العرض على السيد اللواء مساعد رئيس الهيئة):</b> شبكة انحدار العليقات (العبد – قوص) · شبكة انحدار الكوم الأحمر (مكتب الفتح – فرشوط).</div>
@@ -196,11 +197,23 @@ document.getElementById('bOpen').onclick=()=>{all.forEach(n=>n.open=n.depth<=1);
 document.getElementById('bClose').onclick=()=>{all.forEach(n=>{n.open=n.depth<1;n.hit=false});draw();fit()};
 // detail panel
 const D=document.getElementById('detail');
+const f2=v=>a(v.toFixed(2)).replace('.','٫');
+function rate(p){if(!p.xh||p.x==null)return null;const i0=p.xh.findIndex(v=>v!=null);if(i0<0)return null;
+ const d0=new Date(DATA.days[i0]+'T00:00:00'),span=Math.max(1,Math.round((TODAY-d0)/864e5));
+ const act=(p.x-p.xh[i0])*100/span,L=left(p.d),req=(100-p.x*100)/Math.max(L,1);
+ let v,c,proj=null;if(p.x>=1){v='تم';c='g'}else if(L<=0){v='تجاوز الموعد';c='r'}else if(act<=0){v='لا تقدم مسجل';c='r'}else if(act>=req){v='على المعدل';c='g'}else{v='أبطأ من المطلوب';c='y'}
+ if(act>0&&p.x<1){proj=new Date(TODAY.getTime()+Math.ceil((100-p.x*100)/act)*864e5)}
+ return{act,req,v,c,proj,span,from:DATA.days[i0]}}
+const iso=d=>d.toISOString().slice(0,10);
+function rateTD(p){const r=rate(p);if(!r)return'<td>—</td><td>—</td><td>—</td><td>—</td>';
+ return `<td>${f2(r.req)}</td><td>${r.act<0?'<span title="انخفضت النسبة بالتمام">انخفاض</span>':f2(r.act)}</td><td><span class="st ${r.c}">${r.v}</span></td><td>${r.proj?(r.proj.getFullYear()>2027?'أكثر من سنة':dm(iso(r.proj))+(r.proj.getFullYear()!==2026?'/'+a(r.proj.getFullYear()):'')):'—'}</td>`}
+function rateDL(p){const r=rate(p);if(!r||p.x>=1)return'';
+ return `<dt>المعدل المطلوب</dt><dd>${f2(r.req)}٪ يوميًا للنهو في ${dm(p.d)}</dd><dt>المعدل الفعلي</dt><dd>${r.act<0?'انخفضت النسبة بالتمام':f2(r.act)+'٪ يوميًا'} (منذ ${dm(r.from)})</dd><dt>التقييم</dt><dd><span class="st ${r.c}">${r.v}</span>${r.proj?' – النهو المتوقع بهذا المعدل '+dm(iso(r.proj))+(r.proj.getFullYear()!==2026?'/'+a(r.proj.getFullYear()):''):''}</dd>`}
 function projHTML(p){const st=p.st?`<span class="st ${ST[p.st][0]}">${ST[p.st][1]}</span>`:'';
  const lh=p.labh?`<dt>العمالة اليوم</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال اليومية</dt><dd>${esc(a(p.day))}</dd>`:'';
  const xh=p.xh&&p.xh[0]!==p.x?`<dt>تطور النسبة</dt><dd>${pct(p.xh[0])} ← ${pct(p.x)}</dd>`:'';
  return `<h2>${esc(a(p.p))}</h2><div class="chips"><button class="chip fl" data-f="c" data-v="${esc(p.c)}">${p.c}</button><button class="chip fl" data-f="co" data-v="${esc(p.co)}">${esc(p.co)}</button><button class="chip fl" data-f="sec" data-v="${esc(p.sec)}">${p.sec}</button>${p.st?`<button class="st ${ST[p.st][0]} fl" data-f="st" data-v="${p.st}">${ST[p.st][1]}</button>`:''}${p.design?'<button class="chip fl" data-f="st" data-v="w">أعمال مستحدثة</button>':''}${p.done?'<span class="st g">تم النهو</span>':''}</div>
- <dl><dt>نسبة التنفيذ</dt><dd><b>${pct(p.x)}</b></dd>${xh}<dt>موعد النهو الواقعي</dt><dd><b>${dm(p.d)}</b> (${left(p.d)<0?'فات منذ '+a(-left(p.d))+' يوم':'بعد '+a(left(p.d))+' يوم'})</dd><dt>الموعد القديم بالعرض</dt><dd>${dm(p.old)}</dd><dt>المتبقي</dt><dd>${esc(a(p.rem||'—'))}</dd>${lh}</dl>
+ <dl><dt>نسبة التنفيذ</dt><dd><b>${pct(p.x)}</b></dd>${xh}<dt>موعد النهو الواقعي</dt><dd><b>${dm(p.d)}</b> (${left(p.d)<0?'فات منذ '+a(-left(p.d))+' يوم':'بعد '+a(left(p.d))+' يوم'})</dd><dt>الموعد القديم بالعرض</dt><dd>${dm(p.old)}</dd>${rateDL(p)}<dt>المتبقي</dt><dd>${esc(a(p.rem||'—'))}</dd>${lh}</dl>
  ${p.labh?`<div class="chart">${spark(p.labh,300,60)}<div class="cap">القوى البشرية يوميًا من ${dm(DATA.days[0])} إلى ${dm(DATA.days[DATA.days.length-1])}</div></div>`:((p.lab&&p.lab!=='-'?`<dl><dt>العمالة</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال الجارية</dt><dd>${esc(a(p.day||'—'))}</dd></dl>`:'')+'<div class="hint">المشروع ليس ضمن الـ٣١ المتأخرة'+(p.src?' – البيانات من '+p.src:'')+'.</div>')}`+subHTML(p)}
 function subHTML(p){if(!p.sub)return'';return p.sub.map(s=>`<div class="chart" style="margin-top:10px"><h3 style="margin:0 0 6px">${esc(s.name)} – ${esc(s.co)}</h3><dl><dt>نسبة التنفيذ</dt><dd><b>${pct(s.x)}</b></dd><dt>العمالة</dt><dd>${esc(a(s.lab||'—'))}</dd><dt>الأعمال الجارية</dt><dd>${esc(a(s.day||'—'))}</dd><dt>المتبقي</dt><dd>${esc(a(s.rem||'—'))}</dd></dl><div class="hint">جزء من مشروع ${esc(p.p)} – لا يُحتسب مشروعًا مستقلًا.</div></div>`).join('')}
 function groupHTML(n){const items=n.items.slice().sort(byDate);const c=group(items,p=>p.c);
@@ -228,7 +241,7 @@ function line(id,vals,color,bars){const s=document.getElementById(id),w=520,h=23
  s.innerHTML=g}
 function charts(){line('c1',tot,css('--navy'));line('c2',DATA.days.map((d,i)=>late.filter(p=>p.labh[i]>0).length),css('--ok'),true)}
 // table
-document.getElementById('tb').innerHTML=late.slice().sort((x,y)=>({r:0,y:1,g:2,w:3}[x.st]-{r:0,y:1,g:2,w:3}[y.st])||x.d.localeCompare(y.d)).map(p=>`<tr class="click" data-p="${p.id}"><td><b>${esc(a(p.p))}</b></td><td>${p.c}</td><td>${esc(p.co)}</td><td><span class="st ${ST[p.st][0]}">${ST[p.st][1]}</span></td><td>${pct(p.xh[0])===pct(p.x)?pct(p.x):pct(p.xh[0])+' ← '+pct(p.x)}</td><td style="min-width:150px">${spark(p.labh,150,40)}</td><td>${dm(p.d)}</td><td>${a(left(p.d))}</td></tr>`).join('');
+document.getElementById('tb').innerHTML=late.slice().sort((x,y)=>({r:0,y:1,g:2,w:3}[x.st]-{r:0,y:1,g:2,w:3}[y.st])||x.d.localeCompare(y.d)).map(p=>`<tr class="click" data-p="${p.id}"><td><b>${esc(a(p.p))}</b></td><td>${p.c}</td><td>${esc(p.co)}</td><td><span class="st ${ST[p.st][0]}">${ST[p.st][1]}</span></td><td>${pct(p.xh[0])===pct(p.x)?pct(p.x):pct(p.xh[0])+' ← '+pct(p.x)}</td><td style="min-width:150px">${spark(p.labh,150,40)}</td><td>${dm(p.d)}</td><td>${a(left(p.d))}</td>${rateTD(p)}</tr>`).join('');
 document.getElementById('tb').addEventListener('click',e=>{const tr=e.target.closest('tr[data-p]');if(tr){D.innerHTML=projHTML(P.find(p=>p.id===tr.dataset.p));D.scrollIntoView({behavior:'smooth',block:'nearest'})}});
 const OTH=MAIN.filter(p=>!p.late).sort((x,y)=>x.c.localeCompare(y.c,'ar')||x.d.localeCompare(y.d));
 document.getElementById('h2t').textContent='باقي المشروعات الجارية ('+a(OTH.length)+' مشروعًا) – ليست ضمن المتأخرة';
