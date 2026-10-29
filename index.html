@@ -298,14 +298,34 @@ function splitItems(t){if(!t)return[];t=String(t).replace(/_x000B_/g,' ').replac
    .replace(/\s+[-–]+\s*(?=\S)/g,'¦').replace(/(?<=\S)\s*[-–]\s+/g,'¦')
    .replace(/(?<![0-9٠-٩*×])\s*\+\s*(?![0-9٠-٩])/g,'¦')
    .replace(/(?<=[^\s.]{2})\s*[.،]\s+(?=[^\s¦]{2,})/g,'¦')
-   .replace(/\s(جار[يى]|وجار[يى]|تم|استكمال|إستكمال|اعادة|أعادة|إعادة|متبق[يى])\s/g,'¦$1 ');
+   .replace(/\sو\s?(?=[0-9٠-٩])/g,'¦').replace(/(§\d+§)\s+(?=أعمال|اعمال|إستكمال|استكمال)/g,'$1¦').replace(/\s(جار[يى]|وجار[يى]|تم|استكمال|إستكمال|اعادة|أعادة|إعادة|متبق[يى])\s/g,'¦$1 ');
   let items=s.split('¦').map(x=>restore(x).replace(/^[\s.،:+\-–]+|[\s.،:+\-–]+$/g,'')).filter(x=>x&&x.length>1&&x!=='-');
   if(p.label&&!items.length&&!p.text.trim())continue;
   out.push({label:p.label,items})}
  return out.filter(g=>g.items.length||g.label)}
 
 
-function itemsHTML(t){const G=splitItems(t);if(!G.length)return '<p>—</p>';
+function normItem(x){let m;x=x.replace(/^متبق[يى]\s*(اطوال|أطوال)?\s*/,'').trim();if(!x)return null;
+ if((m=x.match(/^عدد\s*=\s*([0-9٠-٩]+)\s*(.*)$/))){if(+m[1].replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d))===0)return null;return m[2].trim()+' – عدد '+m[1]}
+ if((m=x.match(/^طول\s*=\s*([0-9٠-٩.]+)\s*(?:إجمالي\s*)?(.*)$/))){if(parseFloat(m[1])===0)return null;return m[2].trim()+' – بطول '+m[1]+' م'}
+ return x}
+const KW={sup:/توريد|تورد|لم يتم التعاقد|التعاقد/,inst:/كشك|محول|كابل|أعمد[ةه]|اعمد[ةه]|موصلات|طلمب|لوح[ةه]|لوحات|مولد|أوناش|اوناش|ونش|مصاف|مطرق|أجهزة|اجهزة|قياس|محابس|حريق|plc|PLC|باسك|إنارة|انارة|كهروميكانيك|ميكانيك|تيار|ربط حلقي|ربط حلقى|وصلات|شفاط|تكييف|مصعد|أسانسير|كاميرا|فلتر/,
+ civ:/[0-9٠-٩]+\s*م\s*قطر|م\.ط|متر|اطوال|أطوال|تشطيب|دهان|محار|مبان|مباني|بلاط|سورناج|ألوميتال|الوميتال|سور|موقع|حفر|صب|خرسان|مواسير|مطب|مطابق|غرف|عزل|سافيتو|إنترلوك|انترلوك|بردور|بلدور|طرق|ردم|نجار|حداد|أبواب|شبابيك|سلم|درج|معالج/};
+function classify(G,sec){const CIV=sec==='شبكات الصرف'?'أعمال الشبكة':sec==='خطوط الطرد'?'أعمال الخط':'الأعمال الاعتيادية';const out=[];const fixed=/^(توريد|تركيب|الأعمال الاعتيادية|الأعمال الإعتيادية|الاعمال الاعتيادية|التعاقد على)$/;
+ const bucket={توريد:[],تركيب:[],'الأعمال الاعتيادية':[],'':[]};let others=[];
+ for(const g of G){const items=g.items.map(normItem).filter(Boolean);if(!items.length)continue;
+  const L=(g.label||'').replace('الإعتيادية','الاعتيادية').replace('الاعمال','الأعمال');
+  if(L==='توريد'||L==='التعاقد على'){bucket['توريد'].push(...items);continue}
+  if(L==='تركيب'||L==='مهمات لم يتم تركيبها'){bucket['تركيب'].push(...items);continue}
+  if(L==='الأعمال الاعتيادية'){bucket['الأعمال الاعتيادية'].push(...items);continue}
+  if(L&&!/الأعمال الكهروميكانيك|الأعمال الكهربائية/.test(L)){bucket['الأعمال الاعتيادية'].push(...items.map(i=>g.label+': '+i));continue}
+  for(const it of items){const k=KW.sup.test(it)?'توريد':KW.inst.test(it)?'تركيب':(KW.civ.test(it)||/^[0-9٠-٩.]+\s*م\b/.test(it)||CIV!=='الأعمال الاعتيادية')?'الأعمال الاعتيادية':'';bucket[k].push(it)}}
+ for(const k of ['توريد','تركيب','الأعمال الاعتيادية'])if(bucket[k].length)out.push({label:k==='الأعمال الاعتيادية'?CIV:k,items:bucket[k]});
+ out.push(...others);if(bucket[''].length)out.push({label:out.length?'أخرى':null,items:bucket['']});
+ return out}
+
+
+function itemsHTML(t,sec){const G=sec?classify(splitItems(t),sec):[{label:null,items:splitItems(t).flatMap(g=>(g.label?[g.label+': '+(g.items[0]||'')].concat(g.items.slice(1)):g.items))}];if(!G.length)return '<p>—</p>';
  return G.map(g=>`<div class="ig">${g.label?`<div class="igl">${esc(a(g.label))}</div>`:''}<ul class="il">${g.items.map(x=>`<li>${esc(a(x))}</li>`).join('')}</ul></div>`).join('')}
 function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
  const STC={g:['#3DDC84','شغال'],y:['#FFB020','شغال – إنذار زمني'],r:['#FF5A5F','متوقف'],w:['#B8C2D6','منتهٍ طبقًا للتصميم']};
@@ -330,7 +350,7 @@ function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
    <div class="e-lab"><span>القوى البشرية اليوم</span><b>${lab}</b></div>
   </div></div>
  ${stats}
- <div class="e-body">${card('الأعمال المتبقية',itemsHTML(p.rem),1)}${p.day&&p.day!=='-'?card('الأعمال المنفذة اليوم',itemsHTML(p.day),1):''}${sub}</div>
+ <div class="e-body">${card('الأعمال المتبقية',itemsHTML(p.rem,p.sec),1)}${p.day&&p.day!=='-'?card('الأعمال المنفذة اليوم',itemsHTML(p.day),1):''}${sub}</div>
  ${spk}
  <div class="e-foot"><span>الموقف حتى ${dm(DATA.days[DATA.days.length-1])}/${a(2026)}</span><b>المكتب الفني بالمحافظة</b></div></div>`}
 async function shareShot(p,btn){const old=btn.textContent;btn.textContent='جاري تجهيز الصورة…';btn.disabled=true;
@@ -348,7 +368,7 @@ function projHTML(p){const st=p.st?`<span class="st ${ST[p.st][0]}">${ST[p.st][1
  const lh=p.labh?`<dt>العمالة اليوم</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال اليومية</dt><dd>${esc(a(p.day))}</dd>`:'';
  const xh=p.xh&&p.xh[0]!==p.x?`<dt>تطور النسبة</dt><dd>${pct(p.xh[0])} ← ${pct(p.x)}</dd>`:'';
  return `<h2>${esc(a(p.p))}</h2>${waBtn(p)}<div class="chips"><button class="chip fl" data-f="c" data-v="${esc(p.c)}">${p.c}</button><button class="chip fl" data-f="co" data-v="${esc(p.co)}">${esc(p.co)}</button><button class="chip fl" data-f="sec" data-v="${esc(p.sec)}">${p.sec}</button>${p.st?`<button class="st ${ST[p.st][0]} fl" data-f="st" data-v="${p.st}">${ST[p.st][1]}</button>`:''}${p.design?'<button class="chip fl" data-f="st" data-v="w">أعمال مستحدثة</button>':''}${p.done?'<span class="st g">تم النهو</span>':''}</div>
- <dl><dt>نسبة التنفيذ</dt><dd><b>${pct(p.x)}</b></dd>${xh}<dt>موعد النهو الواقعي</dt><dd><b>${dm(p.d)}</b> (${left(p.d)<0?'فات منذ '+a(-left(p.d))+' يوم':'بعد '+a(left(p.d))+' يوم'})</dd><dt>الموعد القديم بالعرض</dt><dd>${dm(p.old)}</dd>${rateDL(p)}${p.note?`<dt>ملاحظة</dt><dd>${esc(a(p.note))}</dd>`:''}<dt>المتبقي</dt><dd class="ilw">${itemsHTML(p.rem)}</dd>${lh}</dl>
+ <dl><dt>نسبة التنفيذ</dt><dd><b>${pct(p.x)}</b></dd>${xh}<dt>موعد النهو الواقعي</dt><dd><b>${dm(p.d)}</b> (${left(p.d)<0?'فات منذ '+a(-left(p.d))+' يوم':'بعد '+a(left(p.d))+' يوم'})</dd><dt>الموعد القديم بالعرض</dt><dd>${dm(p.old)}</dd>${rateDL(p)}${p.note?`<dt>ملاحظة</dt><dd>${esc(a(p.note))}</dd>`:''}<dt>المتبقي</dt><dd class="ilw">${itemsHTML(p.rem,p.sec)}</dd>${lh}</dl>
  ${p.labh?`<div class="chart">${spark(p.labh,300,60)}<div class="cap">القوى البشرية يوميًا من ${dm(DATA.days[0])} إلى ${dm(DATA.days[DATA.days.length-1])}</div></div>`:((p.lab&&p.lab!=='-'?`<dl><dt>العمالة</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال الجارية</dt><dd>${esc(a(p.day||'—'))}</dd></dl>`:'')+'<div class="hint">المشروع ليس ضمن الـ٣١ المتأخرة'+(p.src?' – البيانات من '+p.src:'')+'.</div>')}`+subHTML(p)}
 function subHTML(p){if(!p.sub)return'';return p.sub.map(s=>`<div class="chart" style="margin-top:10px"><h3 style="margin:0 0 6px">${esc(s.name)} – ${esc(s.co)}</h3><dl><dt>نسبة التنفيذ</dt><dd><b>${pct(s.x)}</b></dd><dt>العمالة</dt><dd>${esc(a(s.lab||'—'))}</dd><dt>الأعمال الجارية</dt><dd>${esc(a(s.day||'—'))}</dd><dt>المتبقي</dt><dd>${esc(a(s.rem||'—'))}</dd></dl><div class="hint">جزء من مشروع ${esc(p.p)} – لا يُحتسب مشروعًا مستقلًا.</div></div>`).join('')}
 function groupHTML(n){const items=n.items.slice().sort(byDate);const c=group(items,p=>p.c);
