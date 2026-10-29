@@ -151,6 +151,10 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 .il li.in::before{right:16px;width:4px;height:4px;top:13px;border-radius:50%;transform:none}
 .ilw .il li.sub{color:var(--ink)}
 .ilw .il li.sub::before{background:var(--ink)}
+
+.back{display:inline-flex;align-items:center;gap:6px;font:inherit;font-weight:700;font-size:13px;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:18px;padding:5px 14px;cursor:pointer;margin-bottom:10px}
+.back:hover{filter:brightness(.95)}
+.chip.on{background:#F7CD65;color:#0A1D42;border-color:#F7CD65;font-weight:700}
 </style>
 <div class="wrap">
 <header class="top">
@@ -388,8 +392,18 @@ function subHTML(p){if(!p.sub)return'';return p.sub.map(s=>`<div class="chart" s
 function groupHTML(n){const items=n.items.slice().sort(byDate);const c=group(items,p=>p.c);
  return `<h2>${esc(n.label)}</h2><div class="chips">${['فرشوط','أبوتشت','قوص'].filter(x=>c.has(x)).map(x=>`<span class="chip">${x} ${a(c.get(x).length)}</span>`).join('')}<span class="chip"><b>${a(items.length)} مشروعًا</b></span></div>
  <ul class="plist">${items.map(p=>`<li data-p="${p.id}"><span>${p.st?`<span class="st ${ST[p.st][0]}" style="padding:0 6px;margin-left:6px"> </span>`:''}${esc(a(p.p))} <span class="hint">· ${esc(p.co)}</span></span><span class="d">${dm(p.d)}</span></li>`).join('')}</ul>`}
-function select(n){D.innerHTML=n.kind==='p'?projHTML(n.proj):groupHTML(n)}
-D.addEventListener('click',e=>{const li=e.target.closest('li[data-p]');if(li)D.innerHTML=projHTML(P.find(p=>p.id===li.dataset.p))});
+let NAV=[],CUR=null;
+const FL={g:'المشروعات الشغالة اليوم',y:'مشروعات شغالة – إنذار زمني',r:'المشروعات المتوقفة اليوم',w:'أعمال مستحدثة (منتهية طبقًا للتصميم)'};
+function stLabel(s){return s.t==='p'?P.find(p=>p.id===s.id).p:(s.f==='st'?FL[s.v]:(s.f==='c'?'مركز ':'')+s.v)}
+function backBar(){if(!NAV.length)return'';const s=NAV[NAV.length-1];return `<button class="back" data-back>‹ رجوع إلى: ${esc(a(stLabel(s)))}</button>`}
+function filterItems(f,v){const ACT2=P.filter(p=>!p.done);return f==='st'?(v==='w'?DES:late.filter(p=>p.st===v)):ACT2.filter(p=>p[f]===v)}
+function renderState(s){if(s.t==='p'){D.innerHTML=backBar()+projHTML(P.find(p=>p.id===s.id))}
+ else{const items=filterItems(s.f,s.v);D.innerHTML=backBar()+`<div class="chips" style="margin-bottom:4px"><button class="chip fl on" data-back title="رجوع">✕ ${esc(stLabel(s))}</button></div>`+groupHTML({label:stLabel(s),items})+'<div class="hint" style="margin-top:8px">اضغط على أي مشروع لعرض تفاصيله، أو «رجوع» للعودة.</div>'}
+ D.scrollTop=0}
+function openProj(p,keep){if(!keep)NAV=[];else if(CUR)NAV.push(CUR);CUR={t:'p',id:p.id};renderState(CUR)}
+D.addEventListener('click',e=>{const t=e.target.closest('[data-back]');if(!t)return;e.stopPropagation();if(NAV.length){CUR=NAV.pop();renderState(CUR)}},true);
+function select(n){if(n.kind==='p'){openProj(n.proj)}else{NAV=[];CUR=null;D.innerHTML=groupHTML(n)}}
+D.addEventListener('click',e=>{const li=e.target.closest('li[data-p]');if(li)openProj(P.find(p=>p.id===li.dataset.p),CUR&&CUR.t==='f')});
 // search
 document.getElementById('q').addEventListener('input',e=>{const q=e.target.value.trim();all.forEach(n=>{n.hit=false;n.open=n.depth<1});
  if(q){const norm=s=>s.replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي');const qq=norm(q);
@@ -411,11 +425,11 @@ function line(id,vals,color,bars){const s=document.getElementById(id),w=520,h=23
 function charts(){line('c1',tot,css('--navy'));line('c2',DATA.days.map((d,i)=>late.filter(p=>p.labh[i]>0).length),css('--ok'),true)}
 // table
 document.getElementById('tb').innerHTML=late.slice().sort((x,y)=>({r:0,y:1,g:2,w:3}[x.st]-{r:0,y:1,g:2,w:3}[y.st])||x.d.localeCompare(y.d)).map(p=>`<tr class="click" data-p="${p.id}"><td><b>${esc(a(p.p))}</b></td><td>${p.c}</td><td>${esc(p.co)}</td><td><span class="st ${ST[p.st][0]}">${ST[p.st][1]}</span></td><td>${pct(p.xh[0])===pct(p.x)?pct(p.x):pct(p.xh[0])+' ← '+pct(p.x)}</td><td style="min-width:150px">${spark(p.labh,150,40)}</td><td>${dm(p.d)}</td><td>${a(left(p.d))}</td>${rateTD(p)}</tr>`).join('');
-document.getElementById('tb').addEventListener('click',e=>{const tr=e.target.closest('tr[data-p]');if(tr){D.innerHTML=projHTML(P.find(p=>p.id===tr.dataset.p));D.scrollIntoView({behavior:'smooth',block:'nearest'})}});
+document.getElementById('tb').addEventListener('click',e=>{const tr=e.target.closest('tr[data-p]');if(tr){openProj(P.find(p=>p.id===tr.dataset.p));D.scrollIntoView({behavior:'smooth',block:'nearest'})}});
 const OTH=MAIN.filter(p=>!p.late).sort((x,y)=>x.c.localeCompare(y.c,'ar')||x.d.localeCompare(y.d));
 document.getElementById('h2t').textContent='باقي المشروعات الجارية ('+a(OTH.length)+' مشروعًا) – ليست ضمن المتأخرة';
 document.getElementById('tb2').innerHTML=OTH.map(p=>`<tr class="click" data-p="${p.id}"><td><b>${esc(a(p.p))}</b></td><td>${p.c}</td><td>${esc(p.co)}</td><td>${p.sec}</td><td>${pct(p.x)}</td><td style="min-width:220px;font-size:12px">${esc(a(p.rem||'—'))}</td><td>${dm(p.d)}</td><td>${dm(p.old)}</td><td>${a(left(p.d))}</td></tr>`).join('');
-document.getElementById('tb2').addEventListener('click',e=>{const tr=e.target.closest('tr[data-p]');if(tr){D.innerHTML=projHTML(P.find(p=>p.id===tr.dataset.p));D.scrollIntoView({behavior:'smooth',block:'nearest'})}});
+document.getElementById('tb2').addEventListener('click',e=>{const tr=e.target.closest('tr[data-p]');if(tr){openProj(P.find(p=>p.id===tr.dataset.p));D.scrollIntoView({behavior:'smooth',block:'nearest'})}});
 // company dropdown
 const ACT=P.filter(p=>!p.done), coSel=document.getElementById('coSel');
 [...group(ACT,p=>p.co)].sort((x,y)=>y[1].length-x[1].length||x[0].localeCompare(y[0],'ar')).forEach(([c,arr])=>{const o=document.createElement('option');o.value=c;o.textContent=c+' ('+a(arr.length)+')';coSel.appendChild(o)});
@@ -436,10 +450,9 @@ function intro(tab){tab=tab||'r';const L={g:late.filter(p=>p.st==='g'),y:late.fi
  const T={g:'المشروعات الشغالة اليوم',y:'مشروعات شغالة – إنذار زمني',r:'المشروعات المتوقفة اليوم',w:'منتهية طبقًا للتصميم (أعمال مستحدثة)'};
  const btn=k=>`<button class="st ${k} tabb${k===tab?' on':''}" data-tab="${k}">${ST[k][1].replace('شغال – ','')} (${a(L[k].length)})</button>`;
  D.innerHTML=`<h2>كيف تقرأ الخريطة</h2><p class="sub">في المنتصف إجمالي المشروعات، وحوله الفروع: التوزيع الزمني، والمراكز، والقطاعات، والشركات، والموقف اليومي للمشروعات المتأخرة، والأعمال المستحدثة، والمشروعات التي تم نهوها. اضغط على أي فرع لفتحه، وعلى أي مشروع لعرض تفاصيله هنا.</p><div class="chips tabs">${['g','y','r','w'].map(btn).join('')}</div><div class="hint" style="margin:-4px 0 6px">اضغط على أي حالة لعرض مشروعاتها</div>`+groupHTML({label:T[tab],items:L[tab]});}
-D.addEventListener('click',e=>{const t=e.target.closest('[data-f]');if(!t)return;e.stopPropagation();const f=t.dataset.f,v=t.dataset.v,ACT2=P.filter(p=>!p.done);
- let items,label;if(f==='st'){items=v==='w'?DES:late.filter(p=>p.st===v);label={g:'المشروعات الشغالة اليوم',y:'مشروعات شغالة – إنذار زمني',r:'المشروعات المتوقفة اليوم',w:'أعمال مستحدثة (منتهية طبقًا للتصميم)'}[v]}
- else{items=ACT2.filter(p=>p[f]===v);label=(f==='c'?'مركز ':'')+v}
- D.innerHTML=groupHTML({label,items})+'<div class="hint" style="margin-top:8px">اضغط على أي مشروع لعرض تفاصيله.</div>';D.scrollTop=0});
+D.addEventListener('click',e=>{const t=e.target.closest('[data-f]');if(!t)return;e.stopPropagation();const s={t:'f',f:t.dataset.f,v:t.dataset.v};
+ if(CUR&&CUR.t==='f'&&CUR.f===s.f&&CUR.v===s.v){if(NAV.length){CUR=NAV.pop();renderState(CUR)}return}
+ if(CUR)NAV.push(CUR);CUR=s;renderState(CUR)});
 D.addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t){e.stopPropagation();intro(t.dataset.tab)}});
 select(ROOT);intro('r');
 render();
