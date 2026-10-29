@@ -234,9 +234,14 @@ const late=P.filter(p=>p.late), tot=DATA.tot, T=tot[tot.length-1], Tp=tot[tot.le
 const running=late.filter(p=>p.st==='g'||p.st==='y').length, stopped=late.filter(p=>p.st==='r');
 const months=group(MAIN,p=>+p.d.slice(5,7));
 // KPIs
+const dT=DATA.days[DATA.days.length-1],dP=DATA.days[DATA.days.length-2];
+const nlSum=d=>{let s=0,ok=true;P.forEach(p=>{if(p.late||p.done)return;if(p.lh){if(p.lh[d]==null)ok=false;else s+=p.lh[d]}(p.sub||[]).forEach(q=>{if(q.lh&&q.lh[d]!=null)s+=q.lh[d]})});return ok?s:null};
+P.filter(p=>p.late).forEach(p=>(p.sub||[]).forEach(q=>{}));
+const subSum=d=>P.filter(p=>p.late).reduce((s,p)=>s+(p.sub||[]).reduce((t,q)=>t+((q.lh&&q.lh[d])||0),0),0);
+const nlT=nlSum(dT),nlP=nlSum(dP);const ALLT=T+(nlT||0)+subSum(dT),ALLP=nlP==null?null:Tp+nlP+subSum(dP);
 const K=[['المشروعات الجارية',a(MAIN.length)+' + '+a(DES.length),a(DES.length)+' أعمال مستحدثة'+(DONE.length?' · '+a(DONE.length)+' تم نهوه':'')],['المراكز',a(3),'قوص · أبوتشت · فرشوط'],['الشركات المنفذة',a(new Set(P.map(p=>p.co)).size),'جبالكو مصر '+a(P.filter(p=>p.co==='جبالكو مصر').length)+' مشروعًا'],
  ['مشروعات موعد نهوها في نوفمبر',a(months.get(11).length)+' مشروعًا','وفي ديسمبر ('+a(months.get(12).length)+' مشروعًا) · وفي أكتوبر ('+a((months.get(10)||[]).length)+' مشروعات)'],
- ['القوى البشرية اليوم',a(T),(T>=Tp?'▲ ':'▼ ')+a(Math.abs(T-Tp))+' عن أمس · على المتأخرة'],
+ ['القوى البشرية اليوم – كل المشروعات',a(ALLT),(ALLP!=null?((ALLT>=ALLP?'▲ ':'▼ ')+a(Math.abs(ALLT-ALLP))+' عن أمس · '):'')+'منها '+a(T)+' على المتأخرة و'+a(ALLT-T)+' على باقي المشروعات'],
  ['مؤشر التشغيل',a(Math.round(running*100/(late.length-late.filter(p=>p.st==='w').length)))+'٪',a(running)+' شغال من '+a(late.length-late.filter(p=>p.st==='w').length)],['مشروعات متوقفة',a(stopped.length),'بدون عمالة اليوم',1]];
 document.getElementById('kpis').innerHTML=K.map(k=>`<div class="kpi${k[3]?' hot':''}"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join('');
 // tree
