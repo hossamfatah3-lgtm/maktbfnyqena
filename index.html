@@ -98,29 +98,43 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 .wa{border:0;cursor:pointer;font:inherit;font-weight:700}
 
 .shotwrap{position:fixed;left:-10000px;top:0}
-.sc{width:540px;background:#F4F6FA;color:#13223F;font-family:'ArDigits','IBM Plex Sans Arabic','Cairo',Tahoma,sans-serif;direction:rtl;padding:0 0 14px;box-sizing:border-box}
-.sc *{box-sizing:border-box}
-.sc-head{background:linear-gradient(135deg,#012060 0%,#0B3A8C 100%);color:#fff;padding:18px 22px 16px;border-bottom:5px solid #F7CD65}
-.sc-kick{font-size:12px;color:#F7CD65;font-weight:600;margin-bottom:6px}
-.sc-title{font-family:'ArDigits','Cairo',sans-serif;font-weight:800;font-size:25px;line-height:1.35}
-.sc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.sc-tags span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:14px;padding:2px 11px;font-size:12.5px}
-.sc-status{margin:14px 18px 0;border:2px solid;border-radius:10px;padding:7px 12px;text-align:center;font-family:'ArDigits','Cairo',sans-serif;font-weight:800;font-size:17px}
-.sc-kpis{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:8px;margin:12px 18px 0}
-.sc-kpis .k{background:#fff;border:1px solid #DCE3EE;border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;gap:3px;min-height:92px}
-.sc-kpis span{font-size:11.5px;color:#5E6B84;font-weight:600}
-.sc-kpis b{font-family:'ArDigits','Cairo',sans-serif;font-size:26px;color:#012060;line-height:1.2}
-.sc-kpis b.sm{font-size:14px;line-height:1.5}
-.sc-kpis small{font-size:11px;color:#5E6B84}
-.sc-bar{height:7px;background:#E3E8F1;border-radius:4px;overflow:hidden;margin-top:auto}.sc-bar i{display:block;height:100%;background:#F7CD65;margin-right:0;margin-left:auto}
-.sc-rate{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:8px;margin:8px 18px 0;background:#fff;border:1px solid #DCE3EE;border-radius:10px;padding:9px 12px}
-.sc-rate div{display:flex;flex-direction:column}.sc-rate span{font-size:11.5px;color:#5E6B84}.sc-rate b{font-family:'ArDigits','Cairo',sans-serif;font-size:18px;color:#012060}.sc-rate small{font-size:10.5px;color:#5E6B84}
-.sc-rate .ev{font-family:'ArDigits','Cairo',sans-serif;font-weight:800;font-size:15px;justify-content:center;border-right:1px solid #DCE3EE;padding-right:10px}
-.sc-sec{margin:8px 18px 0;background:#fff;border:1px solid #DCE3EE;border-right:4px solid #012060;border-radius:10px;padding:8px 12px}
-.sc-sec h4{margin:0 0 3px;font-family:'ArDigits','Cairo',sans-serif;font-size:13.5px;color:#012060}
-.sc-sec p{margin:0;font-size:12.5px;line-height:1.75}
-.sc-sec svg text{fill:#5E6B84}.sc-sec svg polyline{stroke:#012060}.sc-sec svg circle{fill:#012060}
-.sc-foot{display:flex;justify-content:space-between;margin:12px 18px 0;padding-top:8px;border-top:2px solid #F7CD65;font-size:11.5px;color:#5E6B84;font-weight:600}
+
+.e{width:540px;direction:rtl;box-sizing:border-box;font-family:'ArDigits','IBM Plex Sans Arabic','Cairo',Tahoma,sans-serif;color:#E9EEF8;
+ background:radial-gradient(120% 60% at 100% 0%,#14336E 0%,rgba(20,51,110,0) 60%),radial-gradient(90% 50% at 0% 100%,#0F2A5C 0%,rgba(15,42,92,0) 60%),linear-gradient(180deg,#071733 0%,#06142F 100%);padding:22px 20px 16px;border:1px solid #1E3A72}
+.e *{box-sizing:border-box}
+.e-orn{display:flex;align-items:center;gap:10px;color:#F7CD65;font-size:12px;font-weight:600;letter-spacing:.2px}
+.e-orn span{flex:1;height:1px;background:linear-gradient(90deg,rgba(247,205,101,0),rgba(247,205,101,.8),rgba(247,205,101,0))}
+.e-title{font-family:'ArDigits','Cairo',sans-serif;font-weight:800;font-size:29px;line-height:1.3;color:#fff;text-align:center;margin:12px 0 10px;text-shadow:0 2px 12px rgba(0,0,0,.35)}
+.e-tags{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
+.e-tags span{border:1px solid rgba(247,205,101,.55);color:#F7E3A8;border-radius:16px;padding:3px 13px;font-size:12.5px;background:rgba(247,205,101,.06)}
+.e-hero{display:flex;gap:16px;align-items:center;margin:18px 0 12px;background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px}
+.e-ring{flex:0 0 150px;height:150px;border-radius:50%;display:grid;place-items:center;box-shadow:0 0 0 4px rgba(247,205,101,.10),0 10px 30px rgba(0,0,0,.35)}
+.e-ring>div{width:118px;height:118px;border-radius:50%;background:#0A1D42;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(247,205,101,.25)}
+.e-ring b{font-family:'ArDigits','Cairo',sans-serif;font-size:40px;line-height:1;color:#fff}
+.e-ring b sup{font-size:20px;color:#F7CD65;margin-right:2px;vertical-align:super}
+.e-ring small{font-size:11px;color:#C9D3E6;margin-top:6px}
+.e-side{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+.e-pill{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;border:1.5px solid;border-radius:20px;padding:4px 13px;font-family:'ArDigits','Cairo',sans-serif;font-weight:800;font-size:14.5px;background:rgba(0,0,0,.18)}
+.e-pill i{width:9px;height:9px;border-radius:50%;box-shadow:0 0 8px currentColor}
+.e-date span,.e-lab span{display:block;font-size:11.5px;color:#9FB0CF}
+.e-date b{font-family:'ArDigits','Cairo',sans-serif;font-size:30px;color:#F7CD65;line-height:1.15}
+.e-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;color:#C9D3E6}
+.e-meta .cd{background:#F7CD65;color:#0A1D42;font-weight:800;border-radius:10px;padding:1px 9px}
+.e-lab b{font-size:14.5px;color:#fff;font-weight:700}
+.e-stats{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:8px;margin-bottom:12px}
+.e-stats>div{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:9px 11px;display:flex;flex-direction:column}
+.e-stats span{font-size:11px;color:#9FB0CF}.e-stats b{font-family:'ArDigits','Cairo',sans-serif;font-size:20px;color:#fff}.e-stats small{font-size:10.5px;color:#9FB0CF}
+.e-stats .ev b{font-size:16px;line-height:1.5}
+.e-body{display:flex;flex-direction:column;gap:9px}
+.e-card{background:#FFFFFF;color:#13223F;border-radius:14px;padding:11px 14px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.e-card h4,.e-chart h4{margin:0 0 4px;display:flex;align-items:center;gap:7px;font-family:'ArDigits','Cairo',sans-serif;font-size:14px;color:#0A1D42}
+.e-card h4 i,.e-chart h4 i{width:16px;height:4px;border-radius:2px;background:#F7CD65;display:inline-block}
+.e-card p{margin:0;font-size:12.5px;line-height:1.8;color:#24324F}
+.e-chart{margin-top:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px 12px 4px}
+.e-chart h4{color:#F7E3A8}
+.e-chart svg polyline{stroke:#F7CD65}.e-chart svg circle{fill:#F7CD65}.e-chart svg text{fill:#C9D3E6}
+.e-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:10px;border-top:1px solid rgba(247,205,101,.45);font-size:11.5px;color:#9FB0CF}
+.e-foot b{color:#F7CD65;font-family:'ArDigits','Cairo',sans-serif;font-size:12.5px}
 </style>
 <div class="wrap">
 <header class="top">
@@ -261,30 +275,35 @@ function waText(p){const R='\u200f',r=rate(p),L=left(p.d);const st=p.st?ST[p.st]
  ln.push('https://hossamfatah3-lgtm.github.io/maktbfnyqena/');
  return ln.join('\n')}
 function waBtn(p){return `<button class="wa" data-shot="${p.id}">مشاركة صورة على واتساب</button>`}
-function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;const STC={g:['#1E7B34','#E3F3E6','شغال'],y:['#B26A00','#FFF1D6','شغال – إنذار زمني'],r:['#C62828','#FDE4E4','متوقف'],w:['#555','#EEE','منتهٍ طبقًا للتصميم']};
- const s=p.st?STC[p.st]:(p.design?STC.w:((p.lab&&p.lab!=='-')?['#1E7B34','#E3F3E6','عليه عمالة اليوم']:['#C62828','#FDE4E4','لا توجد عمالة اليوم']));
- const lab=(p.lab&&p.lab!=='-')?a(p.lab):'لا توجد عمالة';const pcnt=x==null?'—':a(Math.round(x*100))+'٪';
- const bar=x==null?'':`<div class="sc-bar"><i style="width:${Math.round(x*100)}%"></i></div>`;
- const rateBox=(r&&x<1&&r.act!=null)?`<div class="sc-rate"><div><span>المعدل المطلوب</span><b>${f2(r.req)}٪</b><small>يوميًا</small></div><div><span>المعدل الفعلي</span><b>${r.act<0?'انخفاض':f2(r.act)+'٪'}</b><small>يوميًا</small></div><div class="ev" style="color:${{g:'#1E7B34',y:'#B26A00',r:'#C62828',w:'#555'}[r.c]}">${r.v}${r.proj?'<small>النهو المتوقع '+dm(iso(r.proj))+'</small>':''}</div></div>`:'';
- const spk=p.labh?`<div class="sc-sec"><h4>القوى البشرية يوميًا</h4>${spark(p.labh,500,70)}</div>`:'';
- const sub=(p.sub||[]).map(q=>`<div class="sc-sec"><h4>${esc(q.name)} – ${esc(q.co)} · ${pct(q.x)}</h4><p>${esc(a(q.lab||''))}</p></div>`).join('');
- return `<div class="sc">
- <div class="sc-head"><div class="sc-kick">المبادرة الرئاسية «حياة كريمة» · محافظة قنا</div><div class="sc-title">${esc(a(p.p))}</div>
-  <div class="sc-tags"><span>${p.c}</span><span>${esc(p.co)}</span><span>${p.sec}</span></div></div>
- <div class="sc-status" style="background:${s[1]};color:${s[0]};border-color:${s[0]}">${s[2]}${p.design?' · أعمال مستحدثة':''}</div>
- <div class="sc-kpis">
-  <div class="k"><span>نسبة التنفيذ</span><b>${pcnt}</b>${bar}</div>
-  <div class="k"><span>موعد النهو الواقعي</span><b>${dm(p.d)}</b><small>${L>=0?'متبقٍ '+a(L)+' يوم':'فات منذ '+a(-L)+' يوم'} · بالعرض ${dm(p.old)}</small></div>
-  <div class="k"><span>القوى البشرية اليوم</span><b class="sm">${lab}</b></div>
- </div>
- ${rateBox}
- <div class="sc-sec"><h4>الأعمال المتبقية</h4><p>${esc(a(p.rem||'—'))}</p></div>
- ${p.day&&p.day!=='-'?`<div class="sc-sec"><h4>الأعمال المنفذة اليوم</h4><p>${esc(a(p.day))}</p></div>`:''}
- ${sub}${spk}
- <div class="sc-foot"><span>الموقف حتى ${dm(DATA.days[DATA.days.length-1])}/${a(2026)}</span><span>المكتب الفني بالمحافظة</span></div></div>`}
+function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
+ const STC={g:['#3DDC84','شغال'],y:['#FFB020','شغال – إنذار زمني'],r:['#FF5A5F','متوقف'],w:['#B8C2D6','منتهٍ طبقًا للتصميم']};
+ const s=p.st?STC[p.st]:(p.design?STC.w:((p.lab&&p.lab!=='-')?['#3DDC84','عليه عمالة اليوم']:['#FF5A5F','لا توجد عمالة اليوم']));
+ const deg=x==null?0:Math.round(x*360),pc=x==null?'—':a(Math.round(x*100));
+ const lab=(p.lab&&p.lab!=='-')?a(p.lab):'لا توجد عمالة';
+ const ev=(r&&x<1&&r.act!=null)?{g:'#3DDC84',y:'#FFB020',r:'#FF5A5F',w:'#B8C2D6'}[r.c]:null;
+ const stats=(r&&x<1&&r.act!=null)?`<div class="e-stats"><div><span>المعدل المطلوب</span><b>${f2(r.req)}٪</b><small>يوميًا</small></div><div><span>المعدل الفعلي</span><b>${r.act<0?'انخفاض':f2(r.act)+'٪'}</b><small>يوميًا</small></div><div class="ev"><span>التقييم</span><b style="color:${ev}">${r.v}</b>${r.proj?'<small>النهو المتوقع '+dm(iso(r.proj))+'</small>':'<small>&nbsp;</small>'}</div></div>`:'';
+ const card=(t,c)=>`<div class="e-card"><h4><i></i>${t}</h4><p>${c}</p></div>`;
+ const sub=(p.sub||[]).map(q=>card(esc(q.name)+' – '+esc(q.co)+' · '+pct(q.x),esc(a(q.lab||'')))).join('');
+ const spk=p.labh?`<div class="e-chart"><h4><i></i>القوى البشرية يوميًا</h4>${spark(p.labh,490,74)}</div>`:'';
+ return `<div class="e">
+ <div class="e-top"><div class="e-orn"><span></span>المبادرة الرئاسية «حياة كريمة» · محافظة قنا<span></span></div>
+  <div class="e-title">${esc(a(p.p))}</div>
+  <div class="e-tags"><span>${p.c}</span><span>${esc(p.co)}</span><span>${p.sec}</span></div></div>
+ <div class="e-hero">
+  <div class="e-ring" style="background:conic-gradient(#F7CD65 0 ${deg}deg,rgba(255,255,255,.12) ${deg}deg 360deg)"><div><b>${pc}${x==null?'':'<sup>٪</sup>'}</b><small>نسبة التنفيذ</small></div></div>
+  <div class="e-side">
+   <div class="e-pill" style="color:${s[0]};border-color:${s[0]}"><i style="background:${s[0]}"></i>${s[1]}${p.design?' · أعمال مستحدثة':''}</div>
+   <div class="e-date"><span>موعد النهو الواقعي</span><b>${dm(p.d)}</b></div>
+   <div class="e-meta"><span class="cd">${L>=0?'متبقٍ '+a(L)+' يوم':'فات منذ '+a(-L)+' يوم'}</span><span>بالعرض ${dm(p.old)}</span></div>
+   <div class="e-lab"><span>القوى البشرية اليوم</span><b>${lab}</b></div>
+  </div></div>
+ ${stats}
+ <div class="e-body">${card('الأعمال المتبقية',esc(a(p.rem||'—')))}${p.day&&p.day!=='-'?card('الأعمال المنفذة اليوم',esc(a(p.day))):''}${sub}</div>
+ ${spk}
+ <div class="e-foot"><span>الموقف حتى ${dm(DATA.days[DATA.days.length-1])}/${a(2026)}</span><b>المكتب الفني بالمحافظة</b></div></div>`}
 async function shareShot(p,btn){const old=btn.textContent;btn.textContent='جاري تجهيز الصورة…';btn.disabled=true;
  try{const card=document.createElement('div');card.className='shotwrap';card.innerHTML=shotHTML(p);document.body.appendChild(card);
-  const blob=await htmlToImage.toBlob(card.firstElementChild,{pixelRatio:2,backgroundColor:'#F4F6FA',style:{margin:'0'}});
+  const blob=await htmlToImage.toBlob(card.firstElementChild,{pixelRatio:2,backgroundColor:'#06142F',style:{margin:'0'}});
   card.remove();
   const name=p.p.replace(/[\\/:*?"<>|]/g,'')+'.png',file=new File([blob],name,{type:'image/png'});
   if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:p.p})}
