@@ -155,6 +155,13 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 .back{display:inline-flex;align-items:center;gap:6px;font:inherit;font-weight:700;font-size:13px;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:18px;padding:5px 14px;cursor:pointer;margin-bottom:10px}
 .back:hover{filter:brightness(.95)}
 .chip.on{background:#F7CD65;color:#0A1D42;border-color:#F7CD65;font-weight:700}
+
+.ig2{font-size:12.5px;line-height:1.95;color:#24324F;padding:5px 0;border-bottom:1px dashed #D8DFEA}
+.ig2:last-child{border-bottom:0}
+.ig2 .igl{margin:0 0 0 4px}
+.ig2 .sep{color:#C9A227;font-weight:700}
+.ig2 .sep2{color:#C9A227;font-size:9px}
+.ig2 b.sh{color:#0A1D42;font-family:'ArDigits','Cairo',sans-serif}
 </style>
 <div class="wrap">
 <header class="top">
@@ -345,6 +352,11 @@ function classify0(G,sec){const CIV=sec==='شبكات الصرف'?'أعمال ا
 function itemsHTML(t,sec){const G=sec?classify(splitItems(t),sec):[{label:null,items:splitItems(t).flatMap(g=>(g.label?[g.label+': '+(g.items[0]||'')].concat(g.items.slice(1)):g.items))}];if(!G.length)return '<p>—</p>';
  return G.map(g=>{let prev=null,li='';for(const x of g.items){const m=x.match(/^([^:]{2,40}):\s*(.+)$/);if(m){if(m[1]!==prev){li+=`<li class="sub">${esc(a(m[1]))}</li>`;prev=m[1]}li+=`<li class="in">${esc(a(m[2]))}</li>`}else{prev=null;li+=`<li>${esc(a(x))}</li>`}}
  return `<div class="ig">${g.label?`<div class="igl">${esc(a(g.label))}</div>`:''}<ul class="il">${li}</ul></div>`}).join('')}
+function itemsInline(t,sec){const G=sec?classify(splitItems(t),sec):[{label:null,items:splitItems(t).flatMap(g=>(g.label?[g.label+': '+(g.items[0]||'')].concat(g.items.slice(1)):g.items))}];if(!G.length)return '<p>—</p>';
+ const SEP='<span class="sep"> – </span>';
+ return G.map(g=>{const parts=[];let prev=null,buf=[];const flush=()=>{if(buf.length){parts.push((prev?`<b class="sh">${esc(a(prev))}:</b> `:'')+buf.map(x=>esc(a(x))).join(SEP));buf=[]}};
+  for(const x of g.items){const m=x.match(/^([^:]{2,40}):\s*(.+)$/);const k=m?m[1]:null,v=m?m[2]:x;if(k!==prev){flush();prev=k}buf.push(v)}flush();
+  return `<div class="ig2">${g.label?`<span class="igl">${esc(a(g.label))}</span> `:''}${parts.join('<span class="sep2"> ◆ </span>')}</div>`}).join('')}
 function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
  const STC={g:['#3DDC84','شغال'],y:['#FFB020','شغال – إنذار زمني'],r:['#FF5A5F','متوقف'],w:['#B8C2D6','منتهٍ طبقًا للتصميم']};
  const s=p.st?STC[p.st]:(p.design?STC.w:((p.lab&&p.lab!=='-')?['#3DDC84','عليه عمالة اليوم']:['#FF5A5F','لا توجد عمالة اليوم']));
@@ -368,7 +380,7 @@ function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
    <div class="e-lab"><span>القوى البشرية اليوم</span><b>${lab}</b></div>
   </div></div>
  ${stats}
- <div class="e-body">${card('الأعمال المتبقية',itemsHTML(p.rem,p.sec),1)}${p.day&&p.day!=='-'?card('الأعمال المنفذة اليوم',itemsHTML(p.day),1):''}${sub}</div>
+ <div class="e-body">${card('الأعمال المتبقية',itemsInline(p.rem,p.sec),1)}${p.day&&p.day!=='-'?card('الأعمال المنفذة اليوم',itemsInline(p.day),1):''}${sub}</div>
  ${spk}
  <div class="e-foot"><span>الموقف حتى ${dm(DATA.days[DATA.days.length-1])}/${a(2026)}</span><b>المكتب الفني بالمحافظة</b></div></div>`}
 async function shareShot(p,btn){const old=btn.textContent;btn.textContent='جاري تجهيز الصورة…';btn.disabled=true;
