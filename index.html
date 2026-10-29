@@ -84,13 +84,16 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 
 .fl{cursor:pointer;font:inherit;border:1px solid var(--line)}
 .fl:hover{filter:brightness(.93);text-decoration:underline}
+
+.themeBtn{font:inherit;font-size:13px;font-weight:700;padding:6px 14px;border-radius:20px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.themeBtn:hover{filter:brightness(.95)}
 </style>
 <div class="wrap">
 <header class="top">
  <div><div class="eyebrow">المبادرة الرئاسية «حياة كريمة» · الشعبة الهندسية بقنا · المكتب الفني بالمحافظة</div>
  <h1>خريطة المشروعات الجاري تنفيذها – محافظة قنا</h1>
  <div class="sub" id="asof"></div></div>
- <div class="hint">المصدر: كشف مواعيد النهو الواقعية المعتمد والتمام اليومي المجمع</div>
+ <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><button id="themeBtn" class="themeBtn" aria-label="تبديل الوضع الفاتح والغامق"></button><div class="hint">المصدر: كشف مواعيد النهو الواقعية المعتمد والتمام اليومي المجمع</div></div>
 </header>
 <section class="kpis" id="kpis" aria-label="المؤشرات"></section>
 <section class="main">
@@ -255,6 +258,13 @@ coSel.addEventListener('change',()=>{const c=coSel.value;all.forEach(n=>{n.hit=f
   const items=ACT.filter(p=>p.co===c);D.innerHTML=groupHTML({label:c,items})+(items.some(p=>p.design)?'<div class="hint">يشمل أعمالًا مستحدثة (تعديل في التصميم).</div>':'');}
  else select(ROOT);
  draw();fit();D.scrollIntoView({behavior:'smooth',block:'nearest'})});
+// theme toggle
+(function(){const root=document.documentElement,btn=document.getElementById('themeBtn'),mq=matchMedia('(prefers-color-scheme: dark)');
+ try{const s=localStorage.getItem('qena-theme');if(s==='light'||s==='dark')root.setAttribute('data-theme',s)}catch(e){}
+ const eff=()=>root.getAttribute('data-theme')||(mq.matches?'dark':'light');
+ const paintBtn=()=>{btn.textContent=eff()==='dark'?'☀️ الوضع الفاتح':'🌙 الوضع الغامق'};
+ btn.addEventListener('click',()=>{const n=eff()==='dark'?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem('qena-theme',n)}catch(e){}paintBtn()});
+ mq.addEventListener('change',paintBtn);paintBtn()})();
 function render(){draw();fit();charts()}
 function intro(tab){tab=tab||'r';const L={g:late.filter(p=>p.st==='g'),y:late.filter(p=>p.st==='y'),r:late.filter(p=>p.st==='r'),w:DES};
  const T={g:'المشروعات الشغالة اليوم',y:'مشروعات شغالة – إنذار زمني',r:'المشروعات المتوقفة اليوم',w:'منتهية طبقًا للتصميم (أعمال مستحدثة)'};
