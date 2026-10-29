@@ -96,10 +96,31 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 .wa::before{content:"";width:16px;height:16px;background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Cpath fill=%27white%27 d=%27M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z%27/%3E%3C/svg%3E") no-repeat center/contain}
 
 .wa{border:0;cursor:pointer;font:inherit;font-weight:700}
-.shotcard{position:fixed;left:-10000px;top:0;width:560px;background:var(--bg);color:var(--ink);padding:0 0 12px;font-family:var(--body);direction:rtl}
-.shotcard .detail{border:0;box-shadow:none;padding:16px 18px 6px;background:var(--surface);margin:0}
-.shothead{background:#012060;color:#fff;font-family:var(--disp);font-weight:700;font-size:15px;padding:10px 18px;border-bottom:3px solid #F7CD65}
-.shotfoot{font-size:12px;color:var(--mute);padding:6px 18px 0}
+
+.shotwrap{position:fixed;left:-10000px;top:0}
+.sc{width:540px;background:#F4F6FA;color:#13223F;font-family:'ArDigits','IBM Plex Sans Arabic','Cairo',Tahoma,sans-serif;direction:rtl;padding:0 0 14px;box-sizing:border-box}
+.sc *{box-sizing:border-box}
+.sc-head{background:linear-gradient(135deg,#012060 0%,#0B3A8C 100%);color:#fff;padding:18px 22px 16px;border-bottom:5px solid #F7CD65}
+.sc-kick{font-size:12px;color:#F7CD65;font-weight:600;margin-bottom:6px}
+.sc-title{font-family:'ArDigits','Cairo',sans-serif;font-weight:800;font-size:25px;line-height:1.35}
+.sc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.sc-tags span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:14px;padding:2px 11px;font-size:12.5px}
+.sc-status{margin:14px 18px 0;border:2px solid;border-radius:10px;padding:7px 12px;text-align:center;font-family:'ArDigits','Cairo',sans-serif;font-weight:800;font-size:17px}
+.sc-kpis{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:8px;margin:12px 18px 0}
+.sc-kpis .k{background:#fff;border:1px solid #DCE3EE;border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;gap:3px;min-height:92px}
+.sc-kpis span{font-size:11.5px;color:#5E6B84;font-weight:600}
+.sc-kpis b{font-family:'ArDigits','Cairo',sans-serif;font-size:26px;color:#012060;line-height:1.2}
+.sc-kpis b.sm{font-size:14px;line-height:1.5}
+.sc-kpis small{font-size:11px;color:#5E6B84}
+.sc-bar{height:7px;background:#E3E8F1;border-radius:4px;overflow:hidden;margin-top:auto}.sc-bar i{display:block;height:100%;background:#F7CD65;margin-right:0;margin-left:auto}
+.sc-rate{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:8px;margin:8px 18px 0;background:#fff;border:1px solid #DCE3EE;border-radius:10px;padding:9px 12px}
+.sc-rate div{display:flex;flex-direction:column}.sc-rate span{font-size:11.5px;color:#5E6B84}.sc-rate b{font-family:'ArDigits','Cairo',sans-serif;font-size:18px;color:#012060}.sc-rate small{font-size:10.5px;color:#5E6B84}
+.sc-rate .ev{font-family:'ArDigits','Cairo',sans-serif;font-weight:800;font-size:15px;justify-content:center;border-right:1px solid #DCE3EE;padding-right:10px}
+.sc-sec{margin:8px 18px 0;background:#fff;border:1px solid #DCE3EE;border-right:4px solid #012060;border-radius:10px;padding:8px 12px}
+.sc-sec h4{margin:0 0 3px;font-family:'ArDigits','Cairo',sans-serif;font-size:13.5px;color:#012060}
+.sc-sec p{margin:0;font-size:12.5px;line-height:1.75}
+.sc-sec svg text{fill:#5E6B84}.sc-sec svg polyline{stroke:#012060}.sc-sec svg circle{fill:#012060}
+.sc-foot{display:flex;justify-content:space-between;margin:12px 18px 0;padding-top:8px;border-top:2px solid #F7CD65;font-size:11.5px;color:#5E6B84;font-weight:600}
 </style>
 <div class="wrap">
 <header class="top">
@@ -240,13 +261,30 @@ function waText(p){const R='\u200f',r=rate(p),L=left(p.d);const st=p.st?ST[p.st]
  ln.push('https://hossamfatah3-lgtm.github.io/maktbfnyqena/');
  return ln.join('\n')}
 function waBtn(p){return `<button class="wa" data-shot="${p.id}">مشاركة صورة على واتساب</button>`}
+function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;const STC={g:['#1E7B34','#E3F3E6','شغال'],y:['#B26A00','#FFF1D6','شغال – إنذار زمني'],r:['#C62828','#FDE4E4','متوقف'],w:['#555','#EEE','منتهٍ طبقًا للتصميم']};
+ const s=p.st?STC[p.st]:(p.design?STC.w:((p.lab&&p.lab!=='-')?['#1E7B34','#E3F3E6','عليه عمالة اليوم']:['#C62828','#FDE4E4','لا توجد عمالة اليوم']));
+ const lab=(p.lab&&p.lab!=='-')?a(p.lab):'لا توجد عمالة';const pcnt=x==null?'—':a(Math.round(x*100))+'٪';
+ const bar=x==null?'':`<div class="sc-bar"><i style="width:${Math.round(x*100)}%"></i></div>`;
+ const rateBox=(r&&x<1&&r.act!=null)?`<div class="sc-rate"><div><span>المعدل المطلوب</span><b>${f2(r.req)}٪</b><small>يوميًا</small></div><div><span>المعدل الفعلي</span><b>${r.act<0?'انخفاض':f2(r.act)+'٪'}</b><small>يوميًا</small></div><div class="ev" style="color:${{g:'#1E7B34',y:'#B26A00',r:'#C62828',w:'#555'}[r.c]}">${r.v}${r.proj?'<small>النهو المتوقع '+dm(iso(r.proj))+'</small>':''}</div></div>`:'';
+ const spk=p.labh?`<div class="sc-sec"><h4>القوى البشرية يوميًا</h4>${spark(p.labh,500,70)}</div>`:'';
+ const sub=(p.sub||[]).map(q=>`<div class="sc-sec"><h4>${esc(q.name)} – ${esc(q.co)} · ${pct(q.x)}</h4><p>${esc(a(q.lab||''))}</p></div>`).join('');
+ return `<div class="sc">
+ <div class="sc-head"><div class="sc-kick">المبادرة الرئاسية «حياة كريمة» · محافظة قنا</div><div class="sc-title">${esc(a(p.p))}</div>
+  <div class="sc-tags"><span>${p.c}</span><span>${esc(p.co)}</span><span>${p.sec}</span></div></div>
+ <div class="sc-status" style="background:${s[1]};color:${s[0]};border-color:${s[0]}">${s[2]}${p.design?' · أعمال مستحدثة':''}</div>
+ <div class="sc-kpis">
+  <div class="k"><span>نسبة التنفيذ</span><b>${pcnt}</b>${bar}</div>
+  <div class="k"><span>موعد النهو الواقعي</span><b>${dm(p.d)}</b><small>${L>=0?'متبقٍ '+a(L)+' يوم':'فات منذ '+a(-L)+' يوم'} · بالعرض ${dm(p.old)}</small></div>
+  <div class="k"><span>القوى البشرية اليوم</span><b class="sm">${lab}</b></div>
+ </div>
+ ${rateBox}
+ <div class="sc-sec"><h4>الأعمال المتبقية</h4><p>${esc(a(p.rem||'—'))}</p></div>
+ ${p.day&&p.day!=='-'?`<div class="sc-sec"><h4>الأعمال المنفذة اليوم</h4><p>${esc(a(p.day))}</p></div>`:''}
+ ${sub}${spk}
+ <div class="sc-foot"><span>الموقف حتى ${dm(DATA.days[DATA.days.length-1])}/${a(2026)}</span><span>المكتب الفني بالمحافظة</span></div></div>`}
 async function shareShot(p,btn){const old=btn.textContent;btn.textContent='جاري تجهيز الصورة…';btn.disabled=true;
- try{const card=document.createElement('div');card.className='shotcard';
-  const body=projHTML(p).replace(/<button class="wa"[^>]*>[^<]*<\/button>/,'');
-  card.innerHTML=`<div class="shothead">حياة كريمة – قنا · المكتب الفني بالمحافظة</div><div class="detail">${body}</div><div class="shotfoot">الموقف حتى ${dm(DATA.days[DATA.days.length-1])}/${a(2026)}</div>`;
-  document.body.appendChild(card);
-  const bg=getComputedStyle(document.body).backgroundColor;
-  const blob=await htmlToImage.toBlob(card,{pixelRatio:2,backgroundColor:bg,style:{position:'static',left:'0',top:'0',margin:'0'}});
+ try{const card=document.createElement('div');card.className='shotwrap';card.innerHTML=shotHTML(p);document.body.appendChild(card);
+  const blob=await htmlToImage.toBlob(card.firstElementChild,{pixelRatio:2,backgroundColor:'#F4F6FA',style:{margin:'0'}});
   card.remove();
   const name=p.p.replace(/[\\/:*?"<>|]/g,'')+'.png',file=new File([blob],name,{type:'image/png'});
   if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:p.p})}
