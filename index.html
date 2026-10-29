@@ -160,7 +160,9 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 .ig2:last-child{border-bottom:0}
 .ig2 .igl{margin:0 0 0 4px}
 .ig2 .q{color:#6E84AE;font-size:.92em;font-weight:600;white-space:nowrap}
-.ilw .ig2 .q{color:#8EA2C8}
+.ilw .ig2 .q{color:#5D74A3}
+[data-theme="dark"] .ilw .ig2 .q{color:#8EA2C8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ilw .ig2 .q{color:#8EA2C8}}
 .ig2 .sep{color:#C9A227;font-weight:700}
 .ig2 .sep2{color:#C9A227;font-size:9px}
 .ig2 b.sh{color:#0A1D42;font-family:'ArDigits','Cairo',sans-serif}
