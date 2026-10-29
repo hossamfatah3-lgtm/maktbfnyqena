@@ -169,6 +169,10 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 
 .detail dt:has(+ dd.ilw){grid-column:1/-1;margin-top:6px;color:var(--ink);font-weight:700;border-top:1px solid var(--line);padding-top:8px}
 .detail dd.ilw{grid-column:1/-1;margin:0}
+
+.chip.cf{cursor:pointer;font:inherit;border:1px solid var(--line)}
+.chip.cf:hover{filter:brightness(.95)}
+.chip.cf.on{background:#F7CD65;color:#0A1D42;border-color:#F7CD65}
 </style>
 <div class="wrap">
 <header class="top">
@@ -411,8 +415,12 @@ function projHTML(p){const st=p.st?`<span class="st ${ST[p.st][0]}">${ST[p.st][1
  ${p.labh?`<div class="chart">${spark(p.labh,300,60)}<div class="cap">القوى البشرية يوميًا من ${dm(DATA.days[0])} إلى ${dm(DATA.days[DATA.days.length-1])}</div></div>`:((p.lab&&p.lab!=='-'?`<dl><dt>العمالة</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال الجارية</dt><dd class="ilw">${itemsInline(p.day)}</dd></dl>`:'')+lhChart(p.lh,300,60)+'<div class="hint">المشروع ليس ضمن الـ٣١ المتأخرة'+(p.src?' – البيانات من '+p.src:'')+'.</div>')}`+subHTML(p)}
 function subHTML(p){if(!p.sub)return'';return p.sub.map(s=>`<div class="chart" style="margin-top:10px"><h3 style="margin:0 0 6px">${esc(s.name)} – ${esc(s.co)}</h3><dl><dt>نسبة التنفيذ</dt><dd><b>${pct(s.x)}</b></dd><dt>العمالة</dt><dd>${esc(a(s.lab||'—'))}</dd><dt>الأعمال الجارية</dt><dd class="ilw">${itemsInline(s.day)}</dd><dt>المتبقي</dt><dd class="ilw">${itemsInline(s.rem,'محطات المياه')}</dd></dl>${lhChart(s.lh,300,50,'عمالة '+esc(s.name)+' يوميًا')}<div class="hint">جزء من مشروع ${esc(p.p)} – لا يُحتسب مشروعًا مستقلًا.</div></div>`).join('')}
 function groupHTML(n){const items=n.items.slice().sort(byDate);const c=group(items,p=>p.c);
- return `<h2>${esc(n.label)}</h2><div class="chips">${['فرشوط','أبوتشت','قوص'].filter(x=>c.has(x)).map(x=>`<span class="chip">${x} ${a(c.get(x).length)}</span>`).join('')}<span class="chip"><b>${a(items.length)} مشروعًا</b></span></div>
- <ul class="plist">${items.map(p=>`<li data-p="${p.id}"><span>${p.st?`<span class="st ${ST[p.st][0]}" style="padding:0 6px;margin-left:6px"> </span>`:''}${esc(a(p.p))} <span class="hint">· ${esc(p.co)}</span></span><span class="d">${dm(p.d)}</span></li>`).join('')}</ul>`}
+ return `<h2>${esc(n.label)}</h2><div class="chips">${['فرشوط','أبوتشت','قوص'].filter(x=>c.has(x)).map(x=>`<button class="chip cf" data-cf="${x}">${x} ${a(c.get(x).length)}</button>`).join('')}<button class="chip cf all on" data-cf=""><b>${a(items.length)} مشروعًا</b></button></div>
+ <ul class="plist">${items.map(p=>`<li data-p="${p.id}" data-c="${p.c}"><span>${p.st?`<span class="st ${ST[p.st][0]}" style="padding:0 6px;margin-left:6px"> </span>`:''}${esc(a(p.p))} <span class="hint">· ${esc(p.co)}</span></span><span class="d">${dm(p.d)}</span></li>`).join('')}</ul>`}
+D.addEventListener('click',e=>{const t=e.target.closest('[data-cf]');if(!t)return;e.stopPropagation();const box=t.closest('.chips'),list=box.nextElementSibling;
+ const v=(t.classList.contains('on')&&t.dataset.cf)?'':t.dataset.cf;
+ box.querySelectorAll('[data-cf]').forEach(x=>x.classList.toggle('on',x.dataset.cf===v));
+ if(list)list.querySelectorAll('li[data-c]').forEach(li=>li.style.display=(!v||li.dataset.c===v)?'':'none')},true);
 let NAV=[],CUR=null;
 const FL={g:'المشروعات الشغالة اليوم',y:'مشروعات شغالة – إنذار زمني',r:'المشروعات المتوقفة اليوم',w:'أعمال مستحدثة (منتهية طبقًا للتصميم)'};
 function stLabel(s){return s.t==='p'?P.find(p=>p.id===s.id).p:(s.f==='st'?FL[s.v]:(s.f==='c'?'مركز ':'')+s.v)}
