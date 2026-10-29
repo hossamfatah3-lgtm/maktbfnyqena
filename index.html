@@ -144,6 +144,13 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 .il li::before{content:"";position:absolute;right:2px;top:12px;width:6px;height:6px;border-radius:2px;background:#F7CD65;transform:rotate(45deg)}
 .ilw .il li{color:var(--ink);border-bottom-color:var(--line)}
 .ilw .igl{color:#0A1D42}
+
+.il li.sub{font-family:'ArDigits','Cairo',sans-serif;font-weight:700;color:#0A1D42;padding-top:7px;border-bottom:0}
+.il li.sub::before{background:#0A1D42;width:7px;height:7px;top:14px}
+.il li.in{padding-right:30px}
+.il li.in::before{right:16px;width:4px;height:4px;top:13px;border-radius:50%;transform:none}
+.ilw .il li.sub{color:var(--ink)}
+.ilw .il li.sub::before{background:var(--ink)}
 </style>
 <div class="wrap">
 <header class="top">
@@ -311,7 +318,13 @@ function normItem(x){let m;x=x.replace(/^متبق[يى]\s*(اطوال|أطوال
  return x}
 const KW={sup:/توريد|تورد|لم يتم التعاقد|التعاقد/,inst:/كشك|محول|كابل|أعمد[ةه]|اعمد[ةه]|موصلات|طلمب|لوح[ةه]|لوحات|مولد|أوناش|اوناش|ونش|مصاف|مطرق|أجهزة|اجهزة|قياس|محابس|حريق|plc|PLC|باسك|إنارة|انارة|كهروميكانيك|ميكانيك|تيار|ربط حلقي|ربط حلقى|وصلات|شفاط|تكييف|مصعد|أسانسير|كاميرا|فلتر/,
  civ:/[0-9٠-٩]+\s*م\s*قطر|م\.ط|متر|اطوال|أطوال|تشطيب|دهان|محار|مبان|مباني|بلاط|سورناج|ألوميتال|الوميتال|سور|موقع|حفر|صب|خرسان|مواسير|مطب|مطابق|غرف|عزل|سافيتو|إنترلوك|انترلوك|بردور|بلدور|طرق|ردم|نجار|حداد|أبواب|شبابيك|سلم|درج|معالج/};
-function classify(G,sec){const CIV=sec==='شبكات الصرف'?'أعمال الشبكة':sec==='خطوط الطرد'?'أعمال الخط':'الأعمال الاعتيادية';const out=[];const fixed=/^(توريد|تركيب|الأعمال الاعتيادية|الأعمال الإعتيادية|الاعمال الاعتيادية|التعاقد على)$/;
+function mergeFrag(items){const out=[],pf=s=>{const m=s.match(/^([^:]{2,40}):\s*/);return m?m[1]:''};
+ for(const it of items){const p=pf(it),bare=it.replace(/^[^:]{2,40}:\s*/,'').trim();
+  if(/^تم\s*(الانتهاء|الإنتهاء|النهو)$/.test(bare))continue;
+  if(out.length&&pf(out[out.length-1])===p&&/^(جار[يى](\s+(التوريد|التركيب|التنفيذ))?|تم\s.{0,14}|واجار[يى].{0,14}|\(?جار[يى]\)?)$/.test(bare)){out[out.length-1]+=' – '+bare}else out.push(it)}
+ return out}
+function classify(G,sec){return classify0(G,sec).map(g=>({label:g.label,items:mergeFrag(g.items)}))}
+function classify0(G,sec){const CIV=sec==='شبكات الصرف'?'أعمال الشبكة':sec==='خطوط الطرد'?'أعمال الخط':'الأعمال الاعتيادية';const out=[];const fixed=/^(توريد|تركيب|الأعمال الاعتيادية|الأعمال الإعتيادية|الاعمال الاعتيادية|التعاقد على)$/;
  const bucket={توريد:[],تركيب:[],'الأعمال الاعتيادية':[],'':[]};let others=[];
  for(const g of G){const items=g.items.map(normItem).filter(Boolean);if(!items.length)continue;
   const L=(g.label||'').replace('الإعتيادية','الاعتيادية').replace('الاعمال','الأعمال');
@@ -326,7 +339,8 @@ function classify(G,sec){const CIV=sec==='شبكات الصرف'?'أعمال ا�
 
 
 function itemsHTML(t,sec){const G=sec?classify(splitItems(t),sec):[{label:null,items:splitItems(t).flatMap(g=>(g.label?[g.label+': '+(g.items[0]||'')].concat(g.items.slice(1)):g.items))}];if(!G.length)return '<p>—</p>';
- return G.map(g=>`<div class="ig">${g.label?`<div class="igl">${esc(a(g.label))}</div>`:''}<ul class="il">${g.items.map(x=>`<li>${esc(a(x))}</li>`).join('')}</ul></div>`).join('')}
+ return G.map(g=>{let prev=null,li='';for(const x of g.items){const m=x.match(/^([^:]{2,40}):\s*(.+)$/);if(m){if(m[1]!==prev){li+=`<li class="sub">${esc(a(m[1]))}</li>`;prev=m[1]}li+=`<li class="in">${esc(a(m[2]))}</li>`}else{prev=null;li+=`<li>${esc(a(x))}</li>`}}
+ return `<div class="ig">${g.label?`<div class="igl">${esc(a(g.label))}</div>`:''}<ul class="il">${li}</ul></div>`}).join('')}
 function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
  const STC={g:['#3DDC84','شغال'],y:['#FFB020','شغال – إنذار زمني'],r:['#FF5A5F','متوقف'],w:['#B8C2D6','منتهٍ طبقًا للتصميم']};
  const s=p.st?STC[p.st]:(p.design?STC.w:((p.lab&&p.lab!=='-')?['#3DDC84','عليه عمالة اليوم']:['#FF5A5F','لا توجد عمالة اليوم']));
