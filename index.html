@@ -93,6 +93,15 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 
 .wa{display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;font-weight:700;font-size:13px;padding:6px 14px;border-radius:20px;text-decoration:none;margin:2px 0 10px}
 .wa:hover{filter:brightness(.92)}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.ph h2{flex:1;min-width:0}
+.ph .wa{flex:none;width:38px;height:38px;padding:0;margin:2px 0 0;border-radius:50%;justify-content:center;gap:0;box-shadow:0 3px 10px rgba(37,211,102,.35)}
+.ph .wa::before{width:20px;height:20px}
+.ph .wa.busy::before{background:none;border:2.5px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;width:16px;height:16px;animation:waspin .8s linear infinite}
+.ph .wa.ok::before{background:none;content:"✓";color:#fff;font-size:20px;line-height:20px;text-align:center}
+.ph .wa.err{background:#FF5A5F}
+@keyframes waspin{to{transform:rotate(360deg)}}
+
 .wa::before{content:"";width:16px;height:16px;background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Cpath fill=%27white%27 d=%27M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z%27/%3E%3C/svg%3E") no-repeat center/contain}
 
 .wa{border:0;cursor:pointer;font:inherit;font-weight:700}
@@ -321,7 +330,7 @@ function waText(p){const R='\u200f',r=rate(p),L=left(p.d);const st=p.st?ST[p.st]
  ln.push(R+'الموقف حتى '+dm(DATA.days[DATA.days.length-1])+' – المكتب الفني بالمحافظة');
  ln.push('https://hossamfatah3-lgtm.github.io/maktbfnyqena/');
  return ln.join('\n')}
-function waBtn(p){return `<button class="wa" data-shot="${p.id}">مشاركة صورة على واتساب</button>`}
+function waBtn(p){return `<button class="wa" data-shot="${p.id}" title="مشاركة صورة على واتساب" aria-label="مشاركة صورة على واتساب"></button>`}
 function splitItems(t){if(!t)return[];t=String(t).replace(/_x000B_/g,' ').replace(/\s+/g,' ').trim();
  const store=[];let prev;do{prev=t;t=t.replace(/\(([^()]*)\)/g,(m)=>'§'+(store.push(m)-1)+'§')}while(t!==prev);
  const restore=s=>{let p;do{p=s;s=s.replace(/§(\d+)§/g,(m,i)=>store[+i])}while(s!==p);return s.replace(/\(\s+/g,'(').replace(/\s+\)/g,')')};
@@ -404,23 +413,23 @@ function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
  <div class="e-body">${card('الأعمال المتبقية',itemsInline(p.rem,p.sec),1)}${p.day&&p.day!=='-'?card('الأعمال المنفذة اليوم',itemsInline(p.day),1):''}${sub}</div>
  ${spk}
  <div class="e-foot"><span>الموقف حتى ${dm(DATA.days[DATA.days.length-1])}/${a(2026)}</span><b>المكتب الفني بالمحافظة</b></div></div>`}
-async function shareShot(p,btn){const old=btn.textContent;btn.textContent='جاري تجهيز الصورة…';btn.disabled=true;
+async function shareShot(p,btn){const old=btn.title;btn.classList.add('busy');btn.title='جاري تجهيز الصورة…';btn.disabled=true;
  try{const card=document.createElement('div');card.className='shotwrap';card.innerHTML=shotHTML(p);document.body.appendChild(card);
   const blob=await htmlToImage.toBlob(card.firstElementChild,{pixelRatio:2,backgroundColor:'#06142F',style:{margin:'0'}});
   card.remove();
   const name=p.p.replace(/[\\/:*?"<>|]/g,'')+'.png',file=new File([blob],name,{type:'image/png'});
   if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:p.p})}
   else{const u=URL.createObjectURL(blob),l=document.createElement('a');l.href=u;l.download=name;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
-   btn.textContent='تم تنزيل الصورة – أرسلها على واتساب';await new Promise(r=>setTimeout(r,2500))}
- }catch(e){if(e&&e.name!=='AbortError'){console.error(e);btn.textContent='تعذر تجهيز الصورة';await new Promise(r=>setTimeout(r,2000))}}
- btn.textContent=old;btn.disabled=false}
+   btn.classList.remove('busy');btn.classList.add('ok');btn.title='تم تنزيل الصورة – أرسلها على واتساب';await new Promise(r=>setTimeout(r,2000))}
+ }catch(e){if(e&&e.name!=='AbortError'){console.error(e);btn.classList.remove('busy');btn.classList.add('err');btn.title='تعذر تجهيز الصورة';await new Promise(r=>setTimeout(r,2000))}}
+ btn.title=old;btn.classList.remove('busy','ok','err');btn.disabled=false}
 document.addEventListener('click',e=>{const t=e.target.closest('[data-shot]');if(!t)return;e.stopPropagation();shareShot(P.find(p=>p.id===t.dataset.shot),t)},true);
 function lhSeries(o){if(!o)return null;const ks=Object.keys(o).sort();return ks.length?{v:ks.map(k=>o[k]),from:ks[0],to:ks[ks.length-1]}:null}
 function lhChart(o,w,h,cap){const s=lhSeries(o);if(!s)return'';return `<div class="chart">${spark(s.v,w,h)}<div class="cap">${cap||'القوى البشرية يوميًا'} من ${dm(s.from)} إلى ${dm(s.to)}</div></div>`}
 function projHTML(p){const st=p.st?`<span class="st ${ST[p.st][0]}">${ST[p.st][1]}</span>`:'';
  const lh=p.labh?`<dt>العمالة اليوم</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال اليومية</dt><dd class="ilw">${itemsInline(p.day)}</dd>`:'';
  const xh=p.xh&&p.xh[0]!==p.x?`<dt>تطور النسبة</dt><dd>${pct(p.xh[0])} ← ${pct(p.x)}</dd>`:'';
- return `<h2>${esc(a(p.p))}</h2>${waBtn(p)}<div class="chips"><button class="chip fl" data-f="c" data-v="${esc(p.c)}">${p.c}</button><button class="chip fl" data-f="co" data-v="${esc(p.co)}">${esc(p.co)}</button><button class="chip fl" data-f="sec" data-v="${esc(p.sec)}">${p.sec}</button>${p.st?`<button class="st ${ST[p.st][0]} fl" data-f="st" data-v="${p.st}">${ST[p.st][1]}</button>`:''}${p.design?'<button class="chip fl" data-f="st" data-v="w">أعمال مستحدثة</button>':''}${p.done?'<span class="st g">تم النهو</span>':''}</div>
+ return `<div class="ph"><h2>${esc(a(p.p))}</h2>${waBtn(p)}</div><div class="chips"><button class="chip fl" data-f="c" data-v="${esc(p.c)}">${p.c}</button><button class="chip fl" data-f="co" data-v="${esc(p.co)}">${esc(p.co)}</button><button class="chip fl" data-f="sec" data-v="${esc(p.sec)}">${p.sec}</button>${p.st?`<button class="st ${ST[p.st][0]} fl" data-f="st" data-v="${p.st}">${ST[p.st][1]}</button>`:''}${p.design?'<button class="chip fl" data-f="st" data-v="w">أعمال مستحدثة</button>':''}${p.done?'<span class="st g">تم النهو</span>':''}</div>
  <dl><dt>نسبة التنفيذ</dt><dd><b>${pct(p.x)}</b></dd>${xh}<dt>موعد النهو الواقعي</dt><dd><b>${dm(p.d)}</b> (${left(p.d)<0?'فات منذ '+a(-left(p.d))+' يوم':'بعد '+a(left(p.d))+' يوم'})</dd><dt>الموعد القديم بالعرض</dt><dd>${dm(p.old)}</dd>${rateDL(p)}${p.note?`<dt>ملاحظة</dt><dd>${esc(a(p.note))}</dd>`:''}<dt>المتبقي</dt><dd class="ilw">${itemsInline(p.rem,p.sec)}</dd>${lh}</dl>
  ${p.labh?`<div class="chart">${spark(p.labh,300,60)}<div class="cap">القوى البشرية يوميًا من ${dm(DATA.days[0])} إلى ${dm(DATA.days[DATA.days.length-1])}</div></div>`:((p.lab&&p.lab!=='-'?`<dl><dt>العمالة</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال الجارية</dt><dd class="ilw">${itemsInline(p.day)}</dd></dl>`:'')+lhChart(p.lh,300,60)+'<div class="hint">المشروع ليس ضمن الـ٣١ المتأخرة'+(p.src?' – البيانات من '+p.src:'')+'.</div>')}`+subHTML(p)}
 function subHTML(p){if(!p.sub)return'';return p.sub.map(s=>`<div class="chart" style="margin-top:10px"><h3 style="margin:0 0 6px">${esc(s.name)} – ${esc(s.co)}</h3><dl><dt>نسبة التنفيذ</dt><dd><b>${pct(s.x)}</b></dd><dt>العمالة</dt><dd>${esc(a(s.lab||'—'))}</dd><dt>الأعمال الجارية</dt><dd class="ilw">${itemsInline(s.day)}</dd><dt>المتبقي</dt><dd class="ilw">${itemsInline(s.rem,'محطات المياه')}</dd></dl>${lhChart(s.lh,300,50,'عمالة '+esc(s.name)+' يوميًا')}<div class="hint">جزء من مشروع ${esc(p.p)} – لا يُحتسب مشروعًا مستقلًا.</div></div>`).join('')}
