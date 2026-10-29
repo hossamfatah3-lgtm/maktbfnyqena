@@ -135,6 +135,15 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 .e-chart svg polyline{stroke:#F7CD65}.e-chart svg circle{fill:#F7CD65}.e-chart svg text{fill:#C9D3E6}
 .e-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:10px;border-top:1px solid rgba(247,205,101,.45);font-size:11.5px;color:#9FB0CF}
 .e-foot b{color:#F7CD65;font-family:'ArDigits','Cairo',sans-serif;font-size:12.5px}
+
+.ig{margin-top:4px}.ig+.ig{margin-top:8px}
+.igl{display:inline-block;font-family:'ArDigits','Cairo',sans-serif;font-weight:700;font-size:12px;color:#0A1D42;background:#F7E3A8;border-radius:6px;padding:1px 9px;margin-bottom:3px}
+.il{list-style:none;margin:0;padding:0}
+.il li{position:relative;padding:5px 16px 5px 0;font-size:12.5px;line-height:1.6;color:#24324F;border-bottom:1px dashed #D8DFEA}
+.il li:last-child{border-bottom:0}
+.il li::before{content:"";position:absolute;right:2px;top:12px;width:6px;height:6px;border-radius:2px;background:#F7CD65;transform:rotate(45deg)}
+.ilw .il li{color:var(--ink);border-bottom-color:var(--line)}
+.ilw .igl{color:#0A1D42}
 </style>
 <div class="wrap">
 <header class="top">
@@ -275,6 +284,29 @@ function waText(p){const R='\u200f',r=rate(p),L=left(p.d);const st=p.st?ST[p.st]
  ln.push('https://hossamfatah3-lgtm.github.io/maktbfnyqena/');
  return ln.join('\n')}
 function waBtn(p){return `<button class="wa" data-shot="${p.id}">مشاركة صورة على واتساب</button>`}
+function splitItems(t){if(!t)return[];t=String(t).replace(/_x000B_/g,' ').replace(/\s+/g,' ').trim();
+ const store=[];let prev;do{prev=t;t=t.replace(/\(([^()]*)\)/g,(m)=>'§'+(store.push(m)-1)+'§')}while(t!==prev);
+ const restore=s=>{let p;do{p=s;s=s.replace(/§(\d+)§/g,(m,i)=>store[+i])}while(s!==p);return s.replace(/\(\s+/g,'(').replace(/\s+\)/g,')')};
+ const LBL=/(?<=^|\s)((?:ال)?(?:بيار[ةه]|مخزن|مبن[ىي]|غرف[ةه]|خزان|عنبر|مأخذ|سور|محط[ةه]|وحد[ةه]|[اأ]حواض|بحير[ةه])(?:\s(?!تركيب|تور|الأعمال|الاعمال)[^\s:§¦=]{2,}){0,3}|الأعمال الكهروميكانيك|الاعمال الكهروميكانيك|الأعمال الإعتيادية|الأعمال الاعتيادية|الاعمال الاعتيادية|الأعمال الكهربائية|مهمات لم يتم تركيبها|توريـ?د|تركيب|التعاقد على|المأخذ|بيارة المياه العكرة|مبنى [^:§]{2,25}|غرفة [^:§]{2,25}|خزان [^:§]{2,20}|عنبر [^:§]{2,25}|الموقع العام|السور)\s*(?:§\d+§\s*)?:/g;
+ const parts=[];let last=0,label=null,m;
+ while((m=LBL.exec(t))){const seg=t.slice(last,m.index);if(seg.trim()||label)parts.push({label,text:seg});label=restore(m[0].replace(/\s*:$/,'')).replace('توريـد','توريد').trim();last=LBL.lastIndex}
+ parts.push({label,text:t.slice(last)});
+ const out=[];
+ for(const p of parts){let s=' '+p.text+' ';
+  s=s.replace(/\s(عدد|طول)\s*=/g,'¦$1 =')
+   .replace(/(^|\s)([0-9٠-٩]{1,2})\s*[-–]\s?(?=[^\s0-9٠-٩])/g,'¦')
+   .replace(/\s+[-–]+\s*(?=\S)/g,'¦').replace(/(?<=\S)\s*[-–]\s+/g,'¦')
+   .replace(/(?<![0-9٠-٩*×])\s*\+\s*(?![0-9٠-٩])/g,'¦')
+   .replace(/(?<=[^\s.]{2})\s*[.،]\s+(?=[^\s¦]{2,})/g,'¦')
+   .replace(/\s(جار[يى]|وجار[يى]|تم|استكمال|إستكمال|اعادة|أعادة|إعادة|متبق[يى])\s/g,'¦$1 ');
+  let items=s.split('¦').map(x=>restore(x).replace(/^[\s.،:+\-–]+|[\s.،:+\-–]+$/g,'')).filter(x=>x&&x.length>1&&x!=='-');
+  if(p.label&&!items.length&&!p.text.trim())continue;
+  out.push({label:p.label,items})}
+ return out.filter(g=>g.items.length||g.label)}
+
+
+function itemsHTML(t){const G=splitItems(t);if(!G.length)return '<p>—</p>';
+ return G.map(g=>`<div class="ig">${g.label?`<div class="igl">${esc(a(g.label))}</div>`:''}<ul class="il">${g.items.map(x=>`<li>${esc(a(x))}</li>`).join('')}</ul></div>`).join('')}
 function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
  const STC={g:['#3DDC84','شغال'],y:['#FFB020','شغال – إنذار زمني'],r:['#FF5A5F','متوقف'],w:['#B8C2D6','منتهٍ طبقًا للتصميم']};
  const s=p.st?STC[p.st]:(p.design?STC.w:((p.lab&&p.lab!=='-')?['#3DDC84','عليه عمالة اليوم']:['#FF5A5F','لا توجد عمالة اليوم']));
@@ -282,7 +314,7 @@ function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
  const lab=(p.lab&&p.lab!=='-')?a(p.lab):'لا توجد عمالة';
  const ev=(r&&x<1&&r.act!=null)?{g:'#3DDC84',y:'#FFB020',r:'#FF5A5F',w:'#B8C2D6'}[r.c]:null;
  const stats=(r&&x<1&&r.act!=null)?`<div class="e-stats"><div><span>المعدل المطلوب</span><b>${f2(r.req)}٪</b><small>يوميًا</small></div><div><span>المعدل الفعلي</span><b>${r.act<0?'انخفاض':f2(r.act)+'٪'}</b><small>يوميًا</small></div><div class="ev"><span>التقييم</span><b style="color:${ev}">${r.v}</b>${r.proj?'<small>النهو المتوقع '+dm(iso(r.proj))+'</small>':'<small>&nbsp;</small>'}</div></div>`:'';
- const card=(t,c)=>`<div class="e-card"><h4><i></i>${t}</h4><p>${c}</p></div>`;
+ const card=(t,c,raw)=>`<div class="e-card"><h4><i></i>${t}</h4>${raw?c:'<p>'+c+'</p>'}</div>`;
  const sub=(p.sub||[]).map(q=>card(esc(q.name)+' – '+esc(q.co)+' · '+pct(q.x),esc(a(q.lab||'')))).join('');
  const spk=p.labh?`<div class="e-chart"><h4><i></i>القوى البشرية يوميًا</h4>${spark(p.labh,490,74)}</div>`:'';
  return `<div class="e">
@@ -298,7 +330,7 @@ function shotHTML(p){const r=rate(p),L=left(p.d),x=p.x;
    <div class="e-lab"><span>القوى البشرية اليوم</span><b>${lab}</b></div>
   </div></div>
  ${stats}
- <div class="e-body">${card('الأعمال المتبقية',esc(a(p.rem||'—')))}${p.day&&p.day!=='-'?card('الأعمال المنفذة اليوم',esc(a(p.day))):''}${sub}</div>
+ <div class="e-body">${card('الأعمال المتبقية',itemsHTML(p.rem),1)}${p.day&&p.day!=='-'?card('الأعمال المنفذة اليوم',itemsHTML(p.day),1):''}${sub}</div>
  ${spk}
  <div class="e-foot"><span>الموقف حتى ${dm(DATA.days[DATA.days.length-1])}/${a(2026)}</span><b>المكتب الفني بالمحافظة</b></div></div>`}
 async function shareShot(p,btn){const old=btn.textContent;btn.textContent='جاري تجهيز الصورة…';btn.disabled=true;
@@ -316,7 +348,7 @@ function projHTML(p){const st=p.st?`<span class="st ${ST[p.st][0]}">${ST[p.st][1
  const lh=p.labh?`<dt>العمالة اليوم</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال اليومية</dt><dd>${esc(a(p.day))}</dd>`:'';
  const xh=p.xh&&p.xh[0]!==p.x?`<dt>تطور النسبة</dt><dd>${pct(p.xh[0])} ← ${pct(p.x)}</dd>`:'';
  return `<h2>${esc(a(p.p))}</h2>${waBtn(p)}<div class="chips"><button class="chip fl" data-f="c" data-v="${esc(p.c)}">${p.c}</button><button class="chip fl" data-f="co" data-v="${esc(p.co)}">${esc(p.co)}</button><button class="chip fl" data-f="sec" data-v="${esc(p.sec)}">${p.sec}</button>${p.st?`<button class="st ${ST[p.st][0]} fl" data-f="st" data-v="${p.st}">${ST[p.st][1]}</button>`:''}${p.design?'<button class="chip fl" data-f="st" data-v="w">أعمال مستحدثة</button>':''}${p.done?'<span class="st g">تم النهو</span>':''}</div>
- <dl><dt>نسبة التنفيذ</dt><dd><b>${pct(p.x)}</b></dd>${xh}<dt>موعد النهو الواقعي</dt><dd><b>${dm(p.d)}</b> (${left(p.d)<0?'فات منذ '+a(-left(p.d))+' يوم':'بعد '+a(left(p.d))+' يوم'})</dd><dt>الموعد القديم بالعرض</dt><dd>${dm(p.old)}</dd>${rateDL(p)}${p.note?`<dt>ملاحظة</dt><dd>${esc(a(p.note))}</dd>`:''}<dt>المتبقي</dt><dd>${esc(a(p.rem||'—'))}</dd>${lh}</dl>
+ <dl><dt>نسبة التنفيذ</dt><dd><b>${pct(p.x)}</b></dd>${xh}<dt>موعد النهو الواقعي</dt><dd><b>${dm(p.d)}</b> (${left(p.d)<0?'فات منذ '+a(-left(p.d))+' يوم':'بعد '+a(left(p.d))+' يوم'})</dd><dt>الموعد القديم بالعرض</dt><dd>${dm(p.old)}</dd>${rateDL(p)}${p.note?`<dt>ملاحظة</dt><dd>${esc(a(p.note))}</dd>`:''}<dt>المتبقي</dt><dd class="ilw">${itemsHTML(p.rem)}</dd>${lh}</dl>
  ${p.labh?`<div class="chart">${spark(p.labh,300,60)}<div class="cap">القوى البشرية يوميًا من ${dm(DATA.days[0])} إلى ${dm(DATA.days[DATA.days.length-1])}</div></div>`:((p.lab&&p.lab!=='-'?`<dl><dt>العمالة</dt><dd>${esc(a(p.lab))}</dd><dt>الأعمال الجارية</dt><dd>${esc(a(p.day||'—'))}</dd></dl>`:'')+'<div class="hint">المشروع ليس ضمن الـ٣١ المتأخرة'+(p.src?' – البيانات من '+p.src:'')+'.</div>')}`+subHTML(p)}
 function subHTML(p){if(!p.sub)return'';return p.sub.map(s=>`<div class="chart" style="margin-top:10px"><h3 style="margin:0 0 6px">${esc(s.name)} – ${esc(s.co)}</h3><dl><dt>نسبة التنفيذ</dt><dd><b>${pct(s.x)}</b></dd><dt>العمالة</dt><dd>${esc(a(s.lab||'—'))}</dd><dt>الأعمال الجارية</dt><dd>${esc(a(s.day||'—'))}</dd><dt>المتبقي</dt><dd>${esc(a(s.rem||'—'))}</dd></dl><div class="hint">جزء من مشروع ${esc(p.p)} – لا يُحتسب مشروعًا مستقلًا.</div></div>`).join('')}
 function groupHTML(n){const items=n.items.slice().sort(byDate);const c=group(items,p=>p.c);
