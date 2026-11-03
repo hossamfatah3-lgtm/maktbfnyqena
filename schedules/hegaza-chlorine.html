@@ -26,7 +26,7 @@ button.t{font:inherit;font-size:.8rem;border:1px solid var(--ink);background:#ff
 button.t[aria-pressed="true"]{background:var(--ink);color:#fff}
 button.t:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
 .note{margin:0;padding:8px 14px 0;font-size:.8rem;color:var(--ink2)}
-.canvas{overflow:auto;max-height:76vh;background:var(--paper);padding:10px}
+.canvas{overflow:auto;max-height:76vh;background:var(--paper);padding:10px;touch-action:pan-x pan-y;overscroll-behavior:contain}
 svg{display:block}
 svg text{fill:var(--ink)}
 /* wbs */
@@ -98,8 +98,8 @@ table.items tr:nth-child(even) td{background:var(--tint)}
         <button class="t" data-fit="wbs">عرض الهيكل كله</button>
       </div>
     </div>
-    <p class="note">المشروع ← المبنى ← التخصص ← مجموعة الأعمال ← (مجموعة فرعية) ← الأنشطة. الأنشطة المكتوبة بالرمادي مضافة للتسلسل ومن غير بنود. دوس على أي نشاط ينقلك لمكانه في الشبكة.</p>
-    <div class="canvas" id="c-wbs"><svg id="wbs"></svg></div>
+    <p class="note">المشروع ← المبنى ← التخصص ← مجموعة الأعمال ← (مجموعة فرعية) ← الأنشطة. الأنشطة المكتوبة بالرمادي مضافة للتسلسل ومن غير بنود. دوس على أي نشاط ينقلك لمكانه في الشبكة. للتكبير والتصغير: ضم أو افتح صباعين على الشاشة وحرّكهم للتنقل.</p>
+    <div class="canvas" id="c-wbs" dir="ltr"><svg id="wbs"></svg></div>
   </section>
 
   <section class="sheet" id="s-net">
@@ -113,7 +113,7 @@ table.items tr:nth-child(even) td{background:var(--tint)}
         <button class="t" data-fit="net">عرض الشبكة كلها</button>
       </div>
     </div>
-    <p class="note">نفس طريقة الرسم المشهورة: كل مربع نشاط، والأسهم هي العلاقات (كلها FS إلا اللي مكتوب عليها SS). دوس على أي مربع تشوف علاقاته وأسبابها تحت. Ctrl مع عجلة الماوس للتكبير والتصغير.</p>
+    <p class="note">نفس طريقة الرسم المشهورة: كل مربع نشاط، والأسهم هي العلاقات (كلها FS إلا اللي مكتوب عليها SS). دوس على أي مربع تشوف علاقاته وأسبابها تحت. للتكبير والتصغير: ضم أو افتح صباعين على الشاشة (وحرّكهم للتنقل)، أو Ctrl مع عجلة الماوس.</p>
     <div class="canvas" id="c-net" dir="ltr"><svg id="net"></svg></div>
     <div class="key" id="key"></div>
   </section>
@@ -361,20 +361,61 @@ function panel() {
 }
 function scrollToNode(id) { const n = document.querySelector(`#net .nd[data-id="${id}"]`); if (n) n.scrollIntoView({block: 'center', inline: 'center', behavior: 'smooth'}); }
 
-/* ------------------------------------------------------------ zoom */
-const redraw = k => k === 'wbs' ? drawWBS() : drawNet();
-function setZoom(k, z) { Z[k] = Math.min(2, Math.max(.12, +z.toFixed(3))); try { localStorage.setItem('b13z-' + k, Z[k]); } catch (e) {} redraw(k); }
-document.querySelectorAll('[data-z]').forEach(b => b.addEventListener('click', () => setZoom(b.dataset.z, Z[b.dataset.z] * parseFloat(b.dataset.f))));
+/* ------------------------------------------------------------ zoom & pan
+   buttons / Ctrl+wheel / trackpad pinch / two-finger pinch on touch screens.
+   Zoom only resizes the svg (no redraw) and keeps the point under the fingers/cursor in place. */
+const SV = {wbs: 'wbs', net: 'net'};
+function applyZoom(k) { const svg = document.getElementById(SV[k]), [w, h] = SIZE[k]; svg.setAttribute('width', w * Z[k]); svg.setAttribute('height', h * Z[k]); }
+const clampZ = z => Math.min(2.5, Math.max(.1, z));
+function saveZ(k) { try { localStorage.setItem('b13z-' + k, Z[k]); } catch (e) {} }
+function zoomAt(k, z, px, py) {               // px,py = point inside the canvas viewport (css px)
+  const c = document.getElementById('c-' + k), old = Z[k];
+  const cx = (c.scrollLeft + px) / old, cy = (c.scrollTop + py) / old;
+  Z[k] = clampZ(z); applyZoom(k);
+  c.scrollLeft = cx * Z[k] - px; c.scrollTop = cy * Z[k] - py;
+}
+function zoomCenter(k, z) { const c = document.getElementById('c-' + k); zoomAt(k, z, c.clientWidth / 2, c.clientHeight / 2); saveZ(k); }
+document.querySelectorAll('[data-z]').forEach(b => b.addEventListener('click', () => zoomCenter(b.dataset.z, Z[b.dataset.z] * parseFloat(b.dataset.f))));
 document.querySelectorAll('[data-fit]').forEach(b => b.addEventListener('click', () => {
   const k = b.dataset.fit, c = document.getElementById('c-' + k), [w, h] = SIZE[k];
-  setZoom(k, Math.min(1, (c.clientWidth - 24) / w, (Math.min(window.innerHeight, 950) * .74) / h));
+  Z[k] = clampZ(Math.min(1, (c.clientWidth - 24) / w, (Math.min(window.innerHeight, 950) * .74) / h)); applyZoom(k); saveZ(k);
+  c.scrollLeft = 0; c.scrollTop = 0;
 }));
-['wbs', 'net'].forEach(k => document.getElementById('c-' + k).addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); setZoom(k, Z[k] * (e.deltaY < 0 ? 1.1 : 1 / 1.1)); }, {passive: false}));
+['wbs', 'net'].forEach(k => {
+  const c = document.getElementById('c-' + k);
+  // Ctrl + mouse wheel, and laptop trackpad pinch (arrives as ctrl+wheel)
+  c.addEventListener('wheel', e => {
+    if (!e.ctrlKey) return; e.preventDefault();
+    const r = c.getBoundingClientRect();
+    zoomAt(k, Z[k] * Math.exp(-e.deltaY * 0.0025), e.clientX - r.left, e.clientY - r.top); saveZ(k);
+  }, {passive: false});
+  // two fingers: pinch to zoom, move to pan. One finger keeps the normal scroll.
+  let g = null;
+  const mid = (t, r) => [(t[0].clientX + t[1].clientX) / 2 - r.left, (t[0].clientY + t[1].clientY) / 2 - r.top];
+  const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  c.addEventListener('touchstart', e => {
+    if (e.touches.length !== 2) return;
+    e.preventDefault();
+    const r = c.getBoundingClientRect(), [mx, my] = mid(e.touches, r);
+    g = {d: dist(e.touches), z: Z[k], cx: (c.scrollLeft + mx) / Z[k], cy: (c.scrollTop + my) / Z[k]};
+  }, {passive: false});
+  c.addEventListener('touchmove', e => {
+    if (!g || e.touches.length !== 2) return;
+    e.preventDefault();
+    const r = c.getBoundingClientRect(), [mx, my] = mid(e.touches, r);
+    Z[k] = clampZ(g.z * dist(e.touches) / g.d); applyZoom(k);
+    c.scrollLeft = g.cx * Z[k] - mx; c.scrollTop = g.cy * Z[k] - my;   // the content point that started under the fingers follows them
+  }, {passive: false});
+  const end = e => { if (g && e.touches.length < 2) { g = null; saveZ(k); } };
+  c.addEventListener('touchend', end); c.addEventListener('touchcancel', end);
+  // Safari's own page-zoom gesture
+  ['gesturestart', 'gesturechange'].forEach(t => c.addEventListener(t, e => e.preventDefault(), {passive: false}));
+});
 ['wbs', 'net'].forEach(k => { try { const v = parseFloat(localStorage.getItem('b13z-' + k)); if (v) Z[k] = v; } catch (e) {} });
 document.getElementById('b-crit').addEventListener('click', e => { state.crit = !state.crit; e.currentTarget.setAttribute('aria-pressed', state.crit); drawNet(); });
 document.getElementById('b-chain').addEventListener('click', e => { state.chain = !state.chain; e.currentTarget.setAttribute('aria-pressed', state.chain); drawNet(); });
 drawWBS(); drawNet(); panel();
-// start both sheets at their right edge (Arabic reading start) for the tree, left edge for the network (where it begins)
-document.getElementById('c-wbs').scrollLeft = 1e6;
+// the tree reads from the right: open it scrolled to its right edge
+{ const c = document.getElementById('c-wbs'); c.scrollLeft = c.scrollWidth; }
 </script>
 </body></html>
